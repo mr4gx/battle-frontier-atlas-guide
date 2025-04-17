@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockTrainer } from "@/data/mock-data";
+import { toast } from "@/components/ui/sonner";
 
 interface User {
   id: string;
@@ -84,8 +85,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name
         };
         
+        // Set initial tokens for new trainers
+        const initialTokens = 5;
+        
+        // Store user in local storage
         setUser(user);
         localStorage.setItem("atlUser", JSON.stringify(user));
+        
+        // Set initial trainer data with tokens
+        const trainerData = {
+          id: user.id,
+          name: user.name,
+          avatar: "/assets/trainers/default.png",
+          trainerClass: "Novice",
+          wins: 0,
+          losses: 0,
+          badges: [],
+          tokens: initialTokens,
+          team: [],
+          achievementBadges: []
+        };
+        
+        // Store trainer data in local storage
+        localStorage.setItem("atlTrainer", JSON.stringify(trainerData));
+        
+        // Show welcome toast with token info
+        toast.success(`Welcome, Trainer ${name}!`, {
+          description: `You've received ${initialTokens} tokens to start your journey.`
+        });
+        
         navigate("/dashboard");
       } else {
         throw new Error("Invalid registration data");

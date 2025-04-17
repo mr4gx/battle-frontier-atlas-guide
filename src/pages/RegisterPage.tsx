@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/auth-context";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { TokenDisplay } from "@/components/token-display";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
@@ -13,6 +14,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
   const { register, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,8 +33,10 @@ const RegisterPage = () => {
     try {
       setError("");
       await register(email, password, name);
+      setShowSuccess(true);
     } catch (err) {
       setError("Registration failed. Please try again.");
+      setShowSuccess(false);
     }
   };
 
@@ -52,6 +56,16 @@ const RegisterPage = () => {
             {error && (
               <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4 text-sm">
                 {error}
+              </div>
+            )}
+            
+            {showSuccess && (
+              <div className="bg-green-50 text-green-600 p-3 rounded-md mb-4 flex flex-col items-center">
+                <p className="text-sm font-medium mb-2">Registration successful!</p>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm">Starting tokens:</span>
+                  <TokenDisplay count={5} size="sm" />
+                </div>
               </div>
             )}
             

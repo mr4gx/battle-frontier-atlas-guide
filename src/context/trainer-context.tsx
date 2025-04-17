@@ -140,7 +140,7 @@ interface TrainerContextType {
 const TrainerContext = createContext<TrainerContextType | undefined>(undefined);
 
 export function TrainerProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [trainer, setTrainer] = useState<Trainer | null>(null);
   const [battles, setBattles] = useState<Battle[]>([]);
   const [battleRequests, setBattleRequests] = useState<BattleRequest[]>([]);
@@ -148,7 +148,14 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setTrainer(mockTrainer);
+      const savedTrainer = localStorage.getItem("atlTrainer");
+      
+      if (savedTrainer) {
+        setTrainer(JSON.parse(savedTrainer));
+      } else {
+        setTrainer(mockTrainer);
+      }
+      
       setBattles(mockBattles);
       setBattleRequests(mockBattleRequests);
     } else {
@@ -158,7 +165,13 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     }
     
     setIsLoading(false);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (trainer) {
+      localStorage.setItem("atlTrainer", JSON.stringify(trainer));
+    }
+  }, [trainer]);
 
   const updateTrainer = (updates: Partial<Trainer>) => {
     if (!trainer) return;
