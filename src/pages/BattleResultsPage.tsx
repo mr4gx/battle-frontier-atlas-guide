@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Trophy, X, Check, Camera, Upload, RefreshCw } from "lucide-react";
@@ -13,11 +12,13 @@ import { mockFacilities } from "@/data/mock-data";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
+import { useBattleLock } from "@/hooks/use-battle-lock";
 
 const BattleResultsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { trainer, addTokens, updateBadge, subtractTokens, addBattle } = useTrainer();
+  const { lockNavigation, unlockNavigation } = useBattleLock();
   const [notes, setNotes] = useState("");
   const [saveComplete, setSaveComplete] = useState(false);
   const [showTokenAnimation, setShowTokenAnimation] = useState(false);
@@ -26,11 +27,9 @@ const BattleResultsPage = () => {
   const [verificationImage, setVerificationImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Get battle from location state or use a default
   const battle = location.state?.battle as Battle;
   
   if (!battle) {
-    // Redirect to dashboard if no battle data
     navigate("/dashboard");
     return null;
   }
@@ -43,20 +42,26 @@ const BattleResultsPage = () => {
     ? trainer?.badges.find(b => b.facilityId === facility.id) 
     : null;
     
-  // Determine if this battle would earn a badge
   const shouldEarnBadge = battleResult === "win" && facility && badge && !badge.obtained;
   
   useEffect(() => {
-    // If battle result is already determined (not pending), show animations
+    lockNavigation("/battle/results");
+    
+    return () => {
+      if (saveComplete) {
+        unlockNavigation();
+      }
+    };
+  }, [lockNavigation, saveComplete]);
+  
+  useEffect(() => {
     if (battle.result && battle.result !== "pending") {
       setBattleResult(battle.result as "win" | "loss");
       
-      // Show token animation after a delay
       const tokenTimer = setTimeout(() => {
         setShowTokenAnimation(true);
       }, 500);
       
-      // Show badge animation if applicable after token animation
       let badgeTimer: ReturnType<typeof setTimeout>;
       if (shouldEarnBadge) {
         badgeTimer = setTimeout(() => {
@@ -71,15 +76,12 @@ const BattleResultsPage = () => {
     }
   }, [battle.result, shouldEarnBadge]);
   
-  // When token animation completes, actually add the tokens
   useEffect(() => {
     if (showTokenAnimation && battleResult === "win") {
-      // Award double the wager amount (original wager + opponent's wager)
       addTokens(battle.tokensWagered * 2);
     }
   }, [showTokenAnimation, battleResult, battle.tokensWagered, addTokens]);
   
-  // When badge animation completes, actually update the badge
   useEffect(() => {
     if (showBadgeAnimation && shouldEarnBadge && badge) {
       updateBadge(badge.id, { 
@@ -93,16 +95,13 @@ const BattleResultsPage = () => {
     setBattleResult(result);
     
     if (result === "loss") {
-      // Loser pays tokens
       subtractTokens(battle.tokensWagered);
     }
     
-    // After a short delay, show the token animation
     setTimeout(() => {
       setShowTokenAnimation(true);
     }, 500);
     
-    // If it's a win and there's a badge to be earned, show badge animation after tokens
     if (result === "win" && facility && badge && !badge.obtained) {
       setTimeout(() => {
         setShowBadgeAnimation(true);
@@ -128,19 +127,16 @@ const BattleResultsPage = () => {
   };
   
   const handleSaveResult = () => {
-    // Validate that a result has been selected
     if (battleResult === "pending") {
       toast.error("Please select a battle result");
       return;
     }
     
-    // Validate that a verification image has been uploaded
     if (!verificationImage) {
       toast.error("Please upload a verification screenshot");
       return;
     }
     
-    // Create a new battle record
     addBattle({
       opponentId: battle.opponentId,
       opponentName: battle.opponentName,
@@ -153,6 +149,7 @@ const BattleResultsPage = () => {
     
     toast.success("Battle result saved successfully!");
     setSaveComplete(true);
+    unlockNavigation();
   };
   
   const handleReturn = () => {
@@ -167,7 +164,6 @@ const BattleResultsPage = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple text-white pb-20">
-      {/* Header */}
       <header className="px-4 py-4 sticky top-0 z-10 bg-atl-dark-purple/80 backdrop-blur-sm">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -182,7 +178,6 @@ const BattleResultsPage = () => {
 
       <main className="p-4">
         {battleResult !== "pending" ? (
-          /* Result Banner once determined */
           <div 
             className={`w-full p-6 rounded-lg text-white text-center mb-6 ${
               battleResult === "win" 
@@ -205,7 +200,6 @@ const BattleResultsPage = () => {
             </p>
           </div>
         ) : (
-          /* Result Selection if still pending */
           <section className="mb-6">
             <h2 className="text-lg font-semibold mb-3">Battle Outcome</h2>
             <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
@@ -240,7 +234,6 @@ const BattleResultsPage = () => {
           </section>
         )}
         
-        {/* Battle Details */}
         <section className="mb-6">
           <h2 className="text-lg font-semibold mb-3">Battle Details</h2>
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
@@ -292,7 +285,6 @@ const BattleResultsPage = () => {
           </div>
         </section>
         
-        {/* Token Exchange Animation */}
         {battleResult !== "pending" && (
           <section className="mb-6">
             <h2 className="text-lg font-semibold mb-3">Token Exchange</h2>
@@ -323,7 +315,6 @@ const BattleResultsPage = () => {
           </section>
         )}
         
-        {/* Badge Award (if applicable) */}
         {shouldEarnBadge && (
           <section className="mb-6">
             <h2 className="text-lg font-semibold mb-3">Badge Earned</h2>
@@ -350,7 +341,6 @@ const BattleResultsPage = () => {
           </section>
         )}
         
-        {/* Verification Screenshot */}
         <section className="mb-6">
           <h2 className="text-lg font-semibold mb-3">Verification Screenshot</h2>
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
@@ -398,7 +388,6 @@ const BattleResultsPage = () => {
           </div>
         </section>
         
-        {/* Notes Field */}
         <section className="mb-6">
           <h2 className="text-lg font-semibold mb-3">Battle Notes</h2>
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
@@ -412,7 +401,6 @@ const BattleResultsPage = () => {
           </div>
         </section>
         
-        {/* Save Button */}
         <div className="mt-6 space-y-3">
           {!saveComplete ? (
             <Button 

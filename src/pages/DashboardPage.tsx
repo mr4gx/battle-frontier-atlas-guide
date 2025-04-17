@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Bell, ChevronRight, Award, ExternalLink } from "lucide-react";
+import { Bell, ChevronRight, Award, ExternalLink, Sword } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { TokenDisplay } from "@/components/token-display";
 import { Progress } from "@/components/ui/progress";
@@ -74,6 +75,15 @@ const DashboardPage = () => {
 
         {/* Battle Facilities */}
         <section className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-semibold text-white">Battle Areas</h2>
+            <Link 
+              to="/battle-areas" 
+              className="text-white/90 text-sm flex items-center"
+            >
+              View All <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
           <div className="flex overflow-x-auto pb-2 -mx-1 gap-3 hide-scrollbar">
             {mockFacilities.map((facility) => (
               <div key={facility.id} className="w-32 flex-shrink-0">
@@ -92,6 +102,15 @@ const DashboardPage = () => {
 
         {/* Upcoming Battles */}
         <section className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-semibold text-white">Upcoming Battles</h2>
+            <Link 
+              to="/battles" 
+              className="text-white/90 text-sm flex items-center"
+            >
+              <Sword className="h-4 w-4 mr-1" /> Battles <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
           {upcomingMatches.length > 0 ? (
             <div className="space-y-3">
               {upcomingMatches.map((match) => (
