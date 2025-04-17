@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Pokemon } from "@/types";
-import { searchPokemon, getPokemonList, getPokemonDetails, convertToAppFormat } from "@/services/pokemonApi";
+import { searchPokemon, getGen9PokemonList, getPokemonDetails, convertToAppFormat } from "@/services/pokemonApi";
 import { useQuery } from "@tanstack/react-query";
 
 export function usePokemonSearch() {
@@ -9,21 +9,22 @@ export function usePokemonSearch() {
   const [searchResults, setSearchResults] = useState<Pokemon[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
-  // Query for popular Pokémon (to show when no search term)
-  const popularPokemonIds = [25, 6, 9, 3, 149, 150, 94, 59, 130, 143, 65, 448];
+  // Query for popular Gen 9 starter Pokémon (to show when no search term)
+  const gen9StarterIds = [906, 909, 912]; // Sprigatito, Fuecoco, Quaxly
+  const gen9PopularIds = [...gen9StarterIds, 945, 946, 962, 973, 978, 992, 1000, 1001, 1010]; // Add more popular Gen 9 Pokémon
   
   const { data: popularPokemon, isLoading: isLoadingPopular } = useQuery({
-    queryKey: ['popularPokemon'],
+    queryKey: ['popularGen9Pokemon'],
     queryFn: async () => {
       try {
-        const pokemonPromises = popularPokemonIds.map(async id => {
+        const pokemonPromises = gen9PopularIds.map(async id => {
           const details = await getPokemonDetails(id);
           return convertToAppFormat(details);
         });
         
         return Promise.all(pokemonPromises);
       } catch (error) {
-        console.error("Error fetching popular Pokémon:", error);
+        console.error("Error fetching popular Gen 9 Pokémon:", error);
         return [];
       }
     },

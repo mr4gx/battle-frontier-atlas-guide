@@ -38,6 +38,11 @@ interface PokemonDetails {
   }[];
 }
 
+// Generation 9 Pokémon (Scarlet & Violet)
+// Pokémon IDs from #906 (Sprigatito) to #1025 (Iron Boulder)
+const GEN9_MIN_ID = 906;
+const GEN9_MAX_ID = 1025;
+
 // Get a paginated list of Pokémon
 export const getPokemonList = async (limit = 20, offset = 0): Promise<PokemonListResponse> => {
   const response = await fetch(`${BASE_URL}/pokemon?limit=${limit}&offset=${offset}`);
@@ -83,16 +88,57 @@ const getRandomMoves = (moves: string[], count: number): string[] => {
   return shuffled.slice(0, count);
 };
 
-// Search for Pokémon by name
+// Get list of Scarlet & Violet Pokémon (Generation 9)
+export const getGen9PokemonList = async (): Promise<Pokemon[]> => {
+  try {
+    const pokemonPromises = [];
+    
+    // Fetch all Generation 9 Pokémon (from ID 906 to 1025)
+    for (let id = GEN9_MIN_ID; id <= GEN9_MAX_ID; id++) {
+      pokemonPromises.push(
+        getPokemonDetails(id)
+          .then(details => convertToAppFormat(details))
+          .catch(error => {
+            console.error(`Error fetching Pokémon #${id}:`, error);
+            return null;
+          })
+      );
+    }
+    
+    const results = await Promise.all(pokemonPromises);
+    // Filter out any null results (failed fetches)
+    return results.filter(pokemon => pokemon !== null) as Pokemon[];
+  } catch (error) {
+    console.error("Error fetching Generation 9 Pokémon:", error);
+    return [];
+  }
+};
+
+// Search for Pokémon by name within Generation 9
 export const searchPokemon = async (searchTerm: string): Promise<Pokemon[]> => {
   try {
-    // Get a larger list to search through
-    const { results } = await getPokemonList(150, 0);
+    // First try to search within Gen 9 range by ID if the search term is a number
+    const numericSearch = parseInt(searchTerm);
+    if (!isNaN(numericSearch) && numericSearch >= GEN9_MIN_ID && numericSearch <= GEN9_MAX_ID) {
+      try {
+        const details = await getPokemonDetails(numericSearch);
+        return [convertToAppFormat(details)];
+      } catch {
+        // If ID search fails, continue with name search
+      }
+    }
     
-    // Filter by search term
-    const filteredResults = results.filter(pokemon => 
-      pokemon.name.includes(searchTerm.toLowerCase())
-    );
+    // Get a larger list to search through (all Gen 9 Pokémon) - we can optimize this later
+    const { results } = await getPokemonList(200, GEN9_MIN_ID - 1);
+    
+    // Filter by search term and only include Gen 9 Pokémon
+    const filteredResults = results.filter(pokemon => {
+      // Extract ID from URL to check if it's in Gen 9 range
+      const urlParts = pokemon.url.split('/');
+      const id = parseInt(urlParts[urlParts.length - 2]);
+      return pokemon.name.includes(searchTerm.toLowerCase()) && 
+             id >= GEN9_MIN_ID && id <= GEN9_MAX_ID;
+    });
     
     // Limit to first 20 results to avoid too many API calls
     const limitedResults = filteredResults.slice(0, 20);
@@ -105,7 +151,7 @@ export const searchPokemon = async (searchTerm: string): Promise<Pokemon[]> => {
     
     return Promise.all(pokemonPromises);
   } catch (error) {
-    console.error("Error searching Pokémon:", error);
+    console.error("Error searching Generation 9 Pokémon:", error);
     return [];
   }
 };
