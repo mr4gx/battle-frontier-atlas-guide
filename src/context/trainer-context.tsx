@@ -238,7 +238,6 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     if (battle.result === "win") {
       updateTrainer({ wins: (trainer?.wins || 0) + 1 });
       if (battle.facilityId && battle.status === "completed") {
-        // Check for badge achievement when a battle is won and completed
         checkBadgeAchievements(battle.facilityId);
       }
     } else if (battle.result === "loss") {
@@ -264,26 +263,19 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
   const checkBadgeAchievements = (facilityId: string) => {
     if (!trainer) return;
 
-    // Get the facility-specific badge
     const badge = trainer.badges.find(b => b.facilityId === facilityId);
-    if (!badge || badge.obtained) return; // Skip if badge doesn't exist or is already obtained
+    if (!badge || badge.obtained) return;
 
-    // Count completed wins for this facility
     const facilityWins = getBattlesByFacility(facilityId).length;
-    
-    // Find the facility name for better user experience
     const facility = mockFacilities.find(f => f.id === facilityId);
     const facilityName = facility ? facility.name : "Unknown Area";
-    
-    // Check if trainer has won at least 7 battles in this facility
+
     if (facilityWins >= 7) {
-      // Update the badge to obtained
       updateBadge(badge.id, { 
         obtained: true, 
         dateObtained: new Date().toISOString() 
       });
       
-      // Show achievement notification
       toast.custom(() => (
         <BadgeAchievementToast badgeName={facilityName} />
       ), {

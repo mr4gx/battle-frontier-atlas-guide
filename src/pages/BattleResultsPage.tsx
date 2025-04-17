@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Trophy, X, Check, Camera, Upload, RefreshCw } from "lucide-react";
@@ -156,6 +157,7 @@ const BattleResultsPage = () => {
       return;
     }
     
+    // Explicitly set status to "completed" when saving battle result
     const savedBattle = addBattle({
       opponentId: battle.opponentId,
       opponentName: battle.opponentName,
@@ -164,7 +166,7 @@ const BattleResultsPage = () => {
       tokensWagered: battle.tokensWagered,
       notes: notes || `${battleResult === "win" ? "Victory" : "Defeat"} against ${battle.opponentName}`,
       verificationImage: verificationImage,
-      status: "completed"
+      status: "completed"  // Ensure the status is set to completed
     });
     
     if (battleResult === "win" && battle.facilityId) {

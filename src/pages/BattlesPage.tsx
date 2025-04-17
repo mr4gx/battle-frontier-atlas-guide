@@ -19,7 +19,7 @@ const BattlesPage = () => {
   // Get ready battles
   const readyBattles = getReadyBattles();
   
-  // Get active battles
+  // Get active battles - only show battles with status "active" and result "pending"
   const activeBattles = getActiveBattles();
   
   // Get completed battles - explicitly filter for completed status instead of just non-pending
