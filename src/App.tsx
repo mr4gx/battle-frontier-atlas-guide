@@ -23,6 +23,7 @@ import BracketPage from "@/pages/BracketPage";
 import TeamManagementPage from "@/pages/TeamManagementPage";
 import BattleHistoryPage from "@/pages/BattleHistoryPage";
 import NotificationsPage from "@/pages/NotificationsPage";
+import BattleBulletinPage from "@/pages/BattleBulletinPage";
 import NotFound from "@/pages/NotFound";
 
 // Protected Route component
@@ -58,6 +59,7 @@ const App = () => (
                 <Route path="/team" element={<TeamManagementPage />} />
                 <Route path="/battles" element={<BattleHistoryPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/bulletin" element={<BattleBulletinPage />} />
               </Route>
 
               {/* Fallback routes */}

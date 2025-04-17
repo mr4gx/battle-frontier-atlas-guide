@@ -50,6 +50,22 @@ export interface Battle {
   notes?: string;
 }
 
+export interface BattleRequest {
+  id: string;
+  trainerId: string;
+  trainerName: string;
+  trainerAvatar?: string;
+  trainerClass: string;
+  facilityId: string;
+  facilityName: string;
+  battleStyle: string;
+  time: string;
+  tokensWagered: number;
+  notes?: string;
+  status: "open" | "accepted" | "completed" | "canceled";
+  createdAt: string;
+}
+
 export interface Notification {
   id: string;
   title: string;
