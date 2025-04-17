@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Plus, X, Save, Search, Edit2 } from "lucide-react";
@@ -256,10 +255,6 @@ const TeamManagementPage = () => {
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
           <h2 className="font-medium mb-2">Team Rules</h2>
           <ul className="text-sm space-y-1">
-            <li className="flex items-start">
-              <span className="text-atl-primary-purple mr-2">•</span>
-              <span>All Pokémon must be Level 50 for official battles</span>
-            </li>
             <li className="flex items-start">
               <span className="text-atl-primary-purple mr-2">•</span>
               <span>Maximum 6 Pokémon per team</span>
