@@ -1,11 +1,13 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Battle } from '@/types';
 
 interface BattleLockContextType {
   isLocked: boolean;
   activeBattleRoute: string | null;
-  lockNavigation: (route: string) => void;
+  currentBattle: Battle | null;
+  lockNavigation: (route: string, battle?: Battle) => void;
   unlockNavigation: () => void;
 }
 
@@ -14,6 +16,7 @@ const BattleLockContext = createContext<BattleLockContextType | undefined>(undef
 export function BattleLockProvider({ children }: { children: ReactNode }) {
   const [isLocked, setIsLocked] = useState(false);
   const [activeBattleRoute, setActiveBattleRoute] = useState<string | null>(null);
+  const [currentBattle, setCurrentBattle] = useState<Battle | null>(null);
   const [redirectInProgress, setRedirectInProgress] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,14 +28,18 @@ export function BattleLockProvider({ children }: { children: ReactNode }) {
     }
   }, [location.pathname, isLocked]);
 
-  const lockNavigation = (route: string) => {
+  const lockNavigation = (route: string, battle?: Battle) => {
     setIsLocked(true);
     setActiveBattleRoute(route);
+    if (battle) {
+      setCurrentBattle(battle);
+    }
   };
 
   const unlockNavigation = () => {
     setIsLocked(false);
     setActiveBattleRoute(null);
+    setCurrentBattle(null);
     
     // If we're still on the battle results page when unlocking, redirect to dashboard
     if (location.pathname === '/battle/results' && !redirectInProgress) {
@@ -56,6 +63,7 @@ export function BattleLockProvider({ children }: { children: ReactNode }) {
     <BattleLockContext.Provider value={{ 
       isLocked, 
       activeBattleRoute, 
+      currentBattle,
       lockNavigation, 
       unlockNavigation 
     }}>
@@ -70,6 +78,7 @@ export function useBattleLock() {
     return {
       isLocked: false,
       activeBattleRoute: null,
+      currentBattle: null,
       lockNavigation: () => {},
       unlockNavigation: () => {}
     };
