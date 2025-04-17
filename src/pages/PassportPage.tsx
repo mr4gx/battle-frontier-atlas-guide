@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Share2, ChevronLeft } from "lucide-react";
+import { Share2, ChevronLeft, User, Star, Award } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { TokenDisplay } from "@/components/token-display";
 import { BadgeIcon } from "@/components/ui/badge-icon";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useTrainer } from "@/context/trainer-context";
 import { mockFacilities } from "@/data/mock-data";
 import { PokemonSprite } from "@/components/pokemon-sprite";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const PassportPage = () => {
   const { trainer, isLoading } = useTrainer();
@@ -20,18 +21,24 @@ const PassportPage = () => {
     );
   }
 
+  // Calculate stats for summary
+  const badgeCount = trainer.badges.filter(badge => badge.obtained).length;
+  const stampCount = mockFacilities.filter(facility => 
+    trainer.badges.some(b => b.facilityId === facility.id && b.obtained)
+  ).length;
+
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple text-white pb-20">
       {/* Header */}
-      <header className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10">
+      <header className="px-4 py-4 sticky top-0 z-10 bg-atl-dark-purple/80 backdrop-blur-sm">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Link to="/dashboard" className="mr-2">
+            <Link to="/dashboard" className="mr-2 text-white">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-xl font-bold text-atl-dark-purple">Digital Passport</h1>
+            <h1 className="text-xl font-bold">Digital Passport</h1>
           </div>
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button variant="ghost" size="sm" className="gap-1 text-white">
             <Share2 className="h-4 w-4" />
             Share
           </Button>
@@ -39,44 +46,62 @@ const PassportPage = () => {
       </header>
 
       <main className="p-4">
-        {/* Trainer Info */}
-        <section className="mb-6">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <div className="flex items-center mb-4">
-              <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden">
-                {trainer.avatar ? (
-                  <img 
-                    src={trainer.avatar} 
-                    alt={trainer.name} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-atl-primary-purple text-white font-bold text-xl">
-                    {trainer.name.charAt(0)}
-                  </div>
-                )}
-              </div>
-              <div className="ml-4">
-                <h2 className="font-bold text-lg">{trainer.name}</h2>
-                <div className="text-sm text-gray-600">{trainer.trainerClass}</div>
-                <div className="text-xs text-gray-500">ID: {trainer.id}</div>
-              </div>
-            </div>
+        {/* Trainer Profile Card */}
+        <section className="mb-6 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16 border-2 border-white/30">
+              {trainer.avatar ? (
+                <AvatarImage src={trainer.avatar} alt={trainer.name} />
+              ) : (
+                <AvatarFallback className="bg-atl-primary-purple text-white">
+                  {trainer.name.charAt(0)}
+                </AvatarFallback>
+              )}
+            </Avatar>
             
-            <div className="flex justify-between items-center">
-              <div className="text-sm">
-                <span className="text-gray-500">Win/Loss: </span>
-                <span className="font-medium">{trainer.wins}-{trainer.losses}</span>
-              </div>
-              <TokenDisplay count={trainer.tokens} />
+            <div className="flex-1">
+              <h2 className="font-bold text-lg">{trainer.name}</h2>
+              <div className="text-sm text-white/80">{trainer.trainerClass}</div>
+              <div className="text-xs text-white/60">ID: {trainer.id}</div>
             </div>
+          </div>
+          
+          {/* Stats Summary */}
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+            <div className="bg-white/10 rounded-lg p-2">
+              <div className="text-lg font-bold">{badgeCount}</div>
+              <div className="text-xs text-white/70">Badges</div>
+            </div>
+            <div className="bg-white/10 rounded-lg p-2">
+              <div className="text-lg font-bold">{trainer.tokens}</div>
+              <div className="text-xs text-white/70">Tokens</div>
+            </div>
+            <div className="bg-white/10 rounded-lg p-2">
+              <div className="text-lg font-bold">{stampCount}</div>
+              <div className="text-xs text-white/70">Stamps</div>
+            </div>
+          </div>
+          
+          <div className="mt-4 flex justify-between items-center">
+            <div className="text-sm">
+              <span className="text-white/70">Record: </span>
+              <span className="font-medium">{trainer.wins}-{trainer.losses}</span>
+            </div>
+            <TokenDisplay 
+              count={trainer.tokens} 
+              showAddButton 
+              className="bg-white/20 text-white"
+            />
           </div>
         </section>
 
         {/* Badges Collection */}
         <section className="mb-6">
-          <h2 className="text-lg font-semibold mb-3">Frontier Badges</h2>
-          <div className="grid grid-cols-5 gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold mb-3 flex items-center">
+            <Award className="h-5 w-5 mr-2" />
+            Frontier Badges
+          </h2>
+          <div className="grid grid-cols-5 gap-3 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
             {trainer.badges.map((badge) => (
               <div key={badge.id} className="flex flex-col items-center">
                 <BadgeIcon 
@@ -84,7 +109,7 @@ const PassportPage = () => {
                   obtained={badge.obtained}
                   size="md"
                 />
-                <span className="text-xs mt-1 text-center">
+                <span className="text-xs mt-1 text-center text-white/80">
                   {badge.name.split(' ')[1]}
                 </span>
               </div>
@@ -94,7 +119,10 @@ const PassportPage = () => {
 
         {/* Facility Stamps */}
         <section className="mb-6">
-          <h2 className="text-lg font-semibold mb-3">Facility Stamps</h2>
+          <h2 className="text-lg font-semibold mb-3 flex items-center">
+            <Star className="h-5 w-5 mr-2" />
+            Facility Stamps
+          </h2>
           <div className="grid grid-cols-2 gap-3">
             {mockFacilities.map((facility) => {
               const badge = trainer.badges.find(b => b.facilityId === facility.id);
@@ -102,12 +130,12 @@ const PassportPage = () => {
               return (
                 <div 
                   key={facility.id} 
-                  className={`bg-white p-3 rounded-lg shadow-sm border ${
+                  className={`backdrop-blur-sm p-3 rounded-xl border ${
                     badge?.obtained 
-                      ? "border-green-500" 
+                      ? "bg-atl-primary-purple/30 border-atl-primary-purple" 
                       : facility.status === "locked" 
-                        ? "border-gray-300 opacity-70" 
-                        : "border-gray-100"
+                        ? "bg-white/5 border-white/10 opacity-70" 
+                        : "bg-white/10 border-white/20"
                   }`}
                 >
                   <div className="flex justify-between items-start">
@@ -120,11 +148,11 @@ const PassportPage = () => {
                   </div>
                   
                   {badge?.obtained ? (
-                    <div className="mt-1 text-xs text-green-600">
+                    <div className="mt-1 text-xs text-atl-light-purple">
                       Completed: {new Date(badge.dateObtained!).toLocaleDateString()}
                     </div>
                   ) : (
-                    <div className="mt-1 text-xs text-gray-500">
+                    <div className="mt-1 text-xs text-white/60">
                       {facility.status === "locked" ? "Locked" : "Not completed"}
                     </div>
                   )}
@@ -137,29 +165,64 @@ const PassportPage = () => {
         {/* Team Preview */}
         <section>
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold">Team Summary</h2>
+            <h2 className="text-lg font-semibold flex items-center">
+              <User className="h-5 w-5 mr-2" />
+              Active Team
+            </h2>
             <Link 
               to="/team" 
-              className="text-atl-primary-purple text-sm"
+              className="text-atl-light-purple text-sm"
             >
               Manage Team
             </Link>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
             <div className="grid grid-cols-6 gap-2">
               {trainer.team.map((pokemon) => (
                 <div key={pokemon.id} className="flex flex-col items-center">
-                  <PokemonSprite 
-                    id={pokemon.id} 
-                    name={pokemon.name}
-                    size="sm"
-                  />
-                  <span className="text-xs mt-1 truncate w-full text-center">
+                  <div className="bg-white/10 rounded-full p-1">
+                    <PokemonSprite 
+                      id={pokemon.id} 
+                      name={pokemon.name}
+                      size="sm"
+                    />
+                  </div>
+                  <span className="text-xs mt-1 truncate w-full text-center text-white/80">
                     {pokemon.name}
+                  </span>
+                  <span className="text-[10px] text-white/60">
+                    Lv. {pokemon.level}
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+        
+        {/* Achievement Badges - New Section */}
+        <section className="mt-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center">
+            <Award className="h-5 w-5 mr-2" />
+            Achievements
+          </h2>
+          
+          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+            <div className="grid grid-cols-2 gap-3">
+              {trainer.achievementBadges && trainer.achievementBadges.length > 0 ? (
+                trainer.achievementBadges.map((achievement, index) => (
+                  <div key={index} className="bg-white/10 p-2 rounded-lg flex items-center gap-2">
+                    <div className="bg-atl-primary-purple/50 rounded-full p-1.5">
+                      <Award className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm">{achievement}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-2 text-center py-2 text-white/60 text-sm">
+                  No achievements yet. Keep battling!
+                </div>
+              )}
             </div>
           </div>
         </section>
