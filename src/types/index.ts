@@ -1,3 +1,4 @@
+
 export interface Trainer {
   id: string;
   name: string;
@@ -49,7 +50,7 @@ export interface Battle {
   notes?: string;
   linkCode?: string;
   verificationImage?: string;
-  status?: "ready" | "active" | "completed";
+  status: "ready" | "active" | "completed";
 }
 
 export interface BattleRequest {

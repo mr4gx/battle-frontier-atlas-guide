@@ -10,7 +10,6 @@ import { mockTrainer, mockBattles } from "@/data/mock-data";
 import { useAuth } from "./auth-context";
 import { toast } from "@/components/ui/sonner";
 
-// Mock trainers data for leaderboard
 const mockTrainers: Trainer[] = [
   mockTrainer,
   {
@@ -226,7 +225,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       ...battle,
       id: `btl${Date.now()}`,
       date: new Date().toISOString(),
-      status: battle.status || "ready" // Add default status as "ready"
+      status: battle.status || "ready"
     };
     
     setBattles(prev => [newBattle, ...prev]);
@@ -241,7 +240,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
   };
 
   const getBattleHistory = () => {
-    return battles.filter(battle => battle.result !== "pending")
+    return battles.filter(battle => battle.status === "completed")
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
 
@@ -284,10 +283,8 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     
     updateBattleRequest(id, { status: "accepted" });
     
-    // Generate a random 8-digit link code
     const linkCode = Math.floor(10000000 + Math.random() * 90000000).toString();
     
-    // Create the battle with ready status
     const battle = addBattle({
       opponentId: request.trainerId,
       opponentName: request.trainerName,
@@ -295,15 +292,13 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       tokensWagered: request.tokensWagered,
       result: "pending",
       linkCode: linkCode,
-      status: "ready" // Set initial status as ready
+      status: "ready"
     });
     
     toast.success(`You accepted a battle with ${request.trainerName}!`);
     
-    // Send notification to the opponent
     toast.info(`Notification sent to ${request.trainerName} about your acceptance`);
     
-    // Subtract the tokens for the wager
     subtractTokens(request.tokensWagered);
     
     return battle;
@@ -342,7 +337,6 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     return mockTrainers;
   };
 
-  // New function to mark a battle as active
   const startBattle = (battleId: string) => {
     setBattles(prev => 
       prev.map(battle => 
@@ -355,14 +349,14 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     toast.success("Battle started! Good luck!");
   };
 
-  // New function to get battles in "ready" state
   const getReadyBattles = () => {
     return battles.filter(battle => battle.status === "ready");
   };
 
-  // Modified function to get active battles
   const getActiveBattles = () => {
-    return battles.filter(battle => battle.status === "active" && battle.result === "pending");
+    return battles.filter(battle => 
+      battle.status === "active" && battle.result === "pending"
+    );
   };
 
   return (

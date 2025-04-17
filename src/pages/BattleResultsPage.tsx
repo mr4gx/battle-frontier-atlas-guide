@@ -153,6 +153,7 @@ const BattleResultsPage = () => {
       return;
     }
     
+    // Add the battle with the completed status
     addBattle({
       opponentId: battle.opponentId,
       opponentName: battle.opponentName,
@@ -160,7 +161,8 @@ const BattleResultsPage = () => {
       result: battleResult,
       tokensWagered: battle.tokensWagered,
       notes: notes || `${battleResult === "win" ? "Victory" : "Defeat"} against ${battle.opponentName}`,
-      verificationImage: verificationImage
+      verificationImage: verificationImage,
+      status: "completed" // Set status as completed when saving result
     });
     
     toast.success("Battle result saved successfully!");

@@ -22,8 +22,8 @@ const BattlesPage = () => {
   // Get active battles
   const activeBattles = getActiveBattles();
   
-  // Get completed battles
-  const completedBattles = battles.filter(battle => battle.result !== "pending");
+  // Get completed battles - explicitly filter for completed status instead of just non-pending
+  const completedBattles = battles.filter(battle => battle.status === "completed");
   
   // Get facility name
   const getFacilityName = (facilityId?: string) => {
