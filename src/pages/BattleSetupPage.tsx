@@ -26,12 +26,15 @@ const BattleSetupPage = () => {
   const [opponentId, setOpponentId] = useState("");
   const [opponentName, setOpponentName] = useState("");
   const [battleFormat, setBattleFormat] = useState("single");
-  const [tokensWager, setTokensWager] = useState(5);
+  const [tokensWager, setTokensWager] = useState(1);
   const [teamSelected, setTeamSelected] = useState(true);
   const [showLinkCodeDialog, setShowLinkCodeDialog] = useState(false);
   const [linkCode, setLinkCode] = useState("");
   const [linkCodeCopied, setLinkCodeCopied] = useState(false);
   const [isChallengeMode, setIsChallengeMode] = useState(false);
+  
+  // Maximum token wager limit
+  const MAX_TOKEN_WAGER = 5;
   
   useEffect(() => {
     // Check if we're in challenge mode (from leaderboard or QR scan)
@@ -45,7 +48,11 @@ const BattleSetupPage = () => {
           setBattleFormat(selectedFacility.battleStyle.toLowerCase());
         }
       }
-      if (location.state.tokensWagered) setTokensWager(location.state.tokensWagered);
+      if (location.state.tokensWagered) {
+        // Ensure token wager is within limits
+        const wageredTokens = location.state.tokensWagered;
+        setTokensWager(Math.min(MAX_TOKEN_WAGER, Math.max(1, wageredTokens)));
+      }
     }
 
     // Check if we have a link code from the opponent
@@ -58,7 +65,7 @@ const BattleSetupPage = () => {
   if (!trainer) return null;
   
   const handleTokenIncrease = () => {
-    if (tokensWager < trainer.tokens) {
+    if (tokensWager < Math.min(MAX_TOKEN_WAGER, trainer.tokens)) {
       setTokensWager(prev => prev + 1);
     }
   };
@@ -264,6 +271,7 @@ const BattleSetupPage = () => {
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
             <p className="text-sm text-white/80 mb-4">
               The winner receives the wager amount from the loser.
+              <span className="block mt-1 text-white/80">Maximum wager: {MAX_TOKEN_WAGER} tokens</span>
             </p>
             
             <div className="flex items-center justify-between">
@@ -286,7 +294,7 @@ const BattleSetupPage = () => {
                 variant="outline"
                 size="icon"
                 onClick={handleTokenIncrease}
-                disabled={tokensWager >= trainer.tokens || isChallengeMode}
+                disabled={tokensWager >= Math.min(MAX_TOKEN_WAGER, trainer.tokens) || isChallengeMode}
                 className="border-white/20 text-white"
               >
                 <Plus className="h-4 w-4" />
