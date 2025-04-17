@@ -8,7 +8,7 @@ import { mockFacilities } from "@/data/mock-data";
 import { useTrainer } from "@/context/trainer-context";
 import { TokenDisplay } from "@/components/token-display";
 
-const FacilityDetailPage = () => {
+const BattleAreaDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { trainer } = useTrainer();
   const navigate = useNavigate();
@@ -21,9 +21,9 @@ const FacilityDetailPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-bold mb-2">Facility Not Found</h1>
-          <Link to="/facilities" className="text-atl-primary-purple">
-            Return to Facilities
+          <h1 className="text-xl font-bold mb-2">Battle Area Not Found</h1>
+          <Link to="/battle-areas" className="text-atl-primary-purple">
+            Return to Battle Areas
           </Link>
         </div>
       </div>
@@ -77,7 +77,7 @@ const FacilityDetailPage = () => {
       <header className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Link to="/facilities" className="mr-2">
+            <Link to="/battle-areas" className="mr-2">
               <ChevronLeft className="h-5 w-5" />
             </Link>
             <h1 className="text-xl font-bold text-atl-dark-purple">{facility.name}</h1>
@@ -127,7 +127,7 @@ const FacilityDetailPage = () => {
           )}
         </div>
         
-        {/* Facility Description */}
+        {/* Battle Area Description */}
         <section className="mb-6">
           <h2 className="text-lg font-semibold mb-2">About</h2>
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
@@ -214,7 +214,7 @@ const FacilityDetailPage = () => {
               : facility.status === "locked" 
                 ? 'Locked' 
                 : canChallenge() 
-                  ? 'Challenge Facility' 
+                  ? 'Challenge Battle Area' 
                   : 'Requirements Not Met'}
           </Button>
         </div>
@@ -225,4 +225,4 @@ const FacilityDetailPage = () => {
   );
 };
 
-export default FacilityDetailPage;
+export default BattleAreaDetailPage;

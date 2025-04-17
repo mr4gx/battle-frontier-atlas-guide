@@ -9,15 +9,15 @@ import { mockFacilities } from "@/data/mock-data";
 import { useTrainer } from "@/context/trainer-context";
 import { cn } from "@/lib/utils";
 
-const FacilitiesMapPage = () => {
+const BattleAreasMapPage = () => {
   const { trainer } = useTrainer();
   const navigate = useNavigate();
   const [showLegend, setShowLegend] = useState(false);
   
   if (!trainer) return null;
 
-  const handleFacilityClick = (facilityId: string) => {
-    navigate(`/facility/${facilityId}`);
+  const handleBattleAreaClick = (battleAreaId: string) => {
+    navigate(`/battle-area/${battleAreaId}`);
   };
 
   return (
@@ -29,7 +29,7 @@ const FacilitiesMapPage = () => {
             <Link to="/dashboard" className="mr-2">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-xl font-bold text-atl-dark-purple">Battle Facilities</h1>
+            <h1 className="text-xl font-bold text-atl-dark-purple">Battle Areas</h1>
           </div>
           <Button 
             variant="ghost" 
@@ -68,7 +68,7 @@ const FacilitiesMapPage = () => {
           {/* Map Background */}
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=600&h=600')] bg-cover bg-center opacity-20"></div>
           
-          {/* Facilities as nodes on the map */}
+          {/* Battle Areas as nodes on the map */}
           {mockFacilities.map((facility, index) => {
             const badge = trainer.badges.find(b => b.facilityId === facility.id);
             const statusColors = {
@@ -79,12 +79,9 @@ const FacilitiesMapPage = () => {
             
             // Calculate position based on index (a simple layout algorithm)
             const positions = [
-              "top-1/4 left-1/4",        // Facility 1
-              "top-1/4 right-1/4",       // Facility 2
-              "top-1/2 left-1/5",        // Facility 3
-              "top-1/2 right-1/5",       // Facility 4
-              "bottom-1/4 left-1/3",     // Facility 5
-              "bottom-1/4 right-1/3"     // Facility 6
+              "top-1/4 left-1/4",        // Area 1
+              "top-1/2 right-1/4",       // Area 2
+              "bottom-1/4 left-1/3"      // Area 3
             ];
             
             return (
@@ -95,7 +92,7 @@ const FacilitiesMapPage = () => {
                   positions[index],
                   facility.status === "locked" ? "opacity-60" : "opacity-100"
                 )}
-                onClick={() => handleFacilityClick(facility.id)}
+                onClick={() => handleBattleAreaClick(facility.id)}
               >
                 <div 
                   className={cn(
@@ -106,7 +103,7 @@ const FacilitiesMapPage = () => {
                   {facility.name.charAt(0)}
                 </div>
                 
-                {/* Facility name tooltip */}
+                {/* Battle Area name tooltip */}
                 <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-2 py-0.5 rounded text-xs whitespace-nowrap">
                   {facility.name}
                 </div>
@@ -122,9 +119,9 @@ const FacilitiesMapPage = () => {
           })}
         </div>
 
-        {/* Facility List */}
+        {/* Battle Area List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-          <h2 className="font-medium text-sm p-3 border-b border-gray-100">All Facilities</h2>
+          <h2 className="font-medium text-sm p-3 border-b border-gray-100">All Battle Areas</h2>
           <div className="divide-y divide-gray-100">
             {mockFacilities.map((facility) => {
               const badge = trainer.badges.find(b => b.facilityId === facility.id);
@@ -136,7 +133,7 @@ const FacilitiesMapPage = () => {
                     "p-3 flex justify-between items-center cursor-pointer hover:bg-gray-50",
                     facility.status === "locked" ? "opacity-70" : "opacity-100"
                   )}
-                  onClick={() => handleFacilityClick(facility.id)}
+                  onClick={() => handleBattleAreaClick(facility.id)}
                 >
                   <div className="flex items-center">
                     <div 
@@ -176,4 +173,4 @@ const FacilitiesMapPage = () => {
   );
 };
 
-export default FacilitiesMapPage;
+export default BattleAreasMapPage;
