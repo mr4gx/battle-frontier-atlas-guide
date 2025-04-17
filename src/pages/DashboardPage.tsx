@@ -106,9 +106,9 @@ const DashboardPage = () => {
               View All <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="flex overflow-x-auto pb-2 -mx-1 gap-3 hide-scrollbar">
+          <div className="grid grid-cols-3 gap-3">
             {mockFacilities.map((facility) => (
-              <div key={facility.id} className="w-32 flex-shrink-0">
+              <div key={facility.id}>
                 <Link to={`/facility/${facility.id}`}>
                   <FacilityCard
                     name={facility.name}
@@ -195,3 +195,4 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+
