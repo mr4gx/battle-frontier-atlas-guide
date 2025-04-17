@@ -38,7 +38,6 @@ const ProfilePage = () => {
   
   return (
     <div className="atl-gradient-bg min-h-screen pb-24">
-      {/* Header */}
       <header className="bg-white/10 backdrop-blur-md px-4 py-4 border-b border-white/10 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -80,7 +79,6 @@ const ProfilePage = () => {
       </header>
 
       <main className="p-4">
-        {/* Trainer Card */}
         <section className="mb-6">
           <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm border border-white/20">
             <div className="flex items-center mb-6">
@@ -153,7 +151,6 @@ const ProfilePage = () => {
           </div>
         </section>
         
-        {/* Badge Collection */}
         <section className="mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold text-white">Badges</h2>
@@ -161,7 +158,7 @@ const ProfilePage = () => {
               to="/passport" 
               className="text-atl-light-purple text-sm"
             >
-              View Passport
+              View Full Passport
             </Link>
           </div>
           
@@ -187,7 +184,6 @@ const ProfilePage = () => {
           </div>
         </section>
         
-        {/* Team Preview */}
         <section className="mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold text-white">Team</h2>
@@ -217,7 +213,6 @@ const ProfilePage = () => {
           </div>
         </section>
         
-        {/* Achievements */}
         <section>
           <h2 className="text-lg font-semibold mb-3 text-white">Achievements</h2>
           
