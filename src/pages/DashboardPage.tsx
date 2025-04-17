@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Bell, ChevronRight, Award, ExternalLink, Sword } from "lucide-react";
@@ -11,11 +10,12 @@ import { FacilityCard } from "@/components/ui/facility-card";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
+const MAX_TOKENS_TO_QUALIFY = 25;
+
 const DashboardPage = () => {
   const { trainer, isLoading } = useTrainer();
   const [progress, setProgress] = useState(0);
   
-  // Calculate progress percentage based on badges obtained
   useEffect(() => {
     if (trainer) {
       const obtained = trainer.badges.filter(badge => badge.obtained).length;
@@ -24,7 +24,6 @@ const DashboardPage = () => {
     }
   }, [trainer]);
 
-  // Get recent battles
   const upcomingMatches = mockNotifications
     .filter(notif => notif.type === "battle" && !notif.read)
     .slice(0, 3);
@@ -39,7 +38,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple text-white">
-      {/* Header */}
       <header className="px-4 py-4 border-b border-white/10 sticky top-0 z-10 backdrop-blur-md bg-atl-dark-purple/70">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">Dashboard</h1>
@@ -58,7 +56,6 @@ const DashboardPage = () => {
       </header>
 
       <main className="p-4">
-        {/* Welcome Section */}
         <section className="mb-6">
           <div className="atl-glass-card p-4 bg-white/10 backdrop-blur-sm border border-white/20">
             <div className="flex justify-between items-center mb-2">
@@ -70,10 +67,12 @@ const DashboardPage = () => {
               <span>{trainer.badges.filter(b => b.obtained).length} of {trainer.badges.length} Badges</span>
               <Link to="/passport" className="text-white/90 underline">View Passport</Link>
             </div>
+            <div className="text-xs text-white/70 mt-2">
+              Tokens Earned: {trainer.tokens} / {MAX_TOKENS_TO_QUALIFY}
+            </div>
           </div>
         </section>
 
-        {/* Battle Facilities */}
         <section className="mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold text-white">Battle Areas</h2>
@@ -100,7 +99,6 @@ const DashboardPage = () => {
           </div>
         </section>
 
-        {/* Upcoming Battles */}
         <section className="mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold text-white">Upcoming Battles</h2>
@@ -144,7 +142,6 @@ const DashboardPage = () => {
           )}
         </section>
 
-        {/* Event Updates */}
         <section>
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
             <div className="flex items-center gap-3">
