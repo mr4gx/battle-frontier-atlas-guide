@@ -47,6 +47,12 @@ const BattleSetupPage = () => {
       }
       if (location.state.tokensWagered) setTokensWager(location.state.tokensWagered);
     }
+
+    // Check if we have a link code from the opponent
+    if (location.state?.linkCode) {
+      setLinkCode(location.state.linkCode);
+      setShowLinkCodeDialog(true);
+    }
   }, [location.state]);
   
   if (!trainer) return null;
@@ -68,12 +74,20 @@ const BattleSetupPage = () => {
     const code = Math.floor(10000000 + Math.random() * 90000000).toString();
     setLinkCode(code);
     setShowLinkCodeDialog(true);
+
+    // Share link code with the opponent (in a real app, this would be a WebSocket or API call)
+    // For demo, we'll just log it
+    console.log(`Link code ${code} generated for battle with ${opponentName}`);
+    
+    // Subtract tokens for the wager
+    subtractTokens(tokensWager);
   };
   
   const copyLinkCode = () => {
     navigator.clipboard.writeText(linkCode);
     setLinkCodeCopied(true);
     setTimeout(() => setLinkCodeCopied(false), 2000);
+    toast.success("Link code copied to clipboard");
   };
   
   const handleBattleStart = () => {
@@ -92,7 +106,7 @@ const BattleSetupPage = () => {
     if (isChallengeMode) {
       // Create battle request
       try {
-        createBattleRequest({
+        const request = createBattleRequest({
           facilityId: facilityId || "",
           facilityName: facility?.name || "Unknown Facility",
           battleStyle: battleFormat,
@@ -102,8 +116,13 @@ const BattleSetupPage = () => {
           opponentId: opponentId
         });
         
+        // Generate a link code for the battle request too
+        const code = Math.floor(10000000 + Math.random() * 90000000).toString();
+        setLinkCode(code);
+        
         toast.success("Battle request sent! Waiting for opponent to accept.");
-        navigate("/bulletin");
+        // Show link code dialog even for challenge mode
+        setShowLinkCodeDialog(true);
       } catch (error) {
         toast.error("Failed to create battle request");
       }
@@ -114,13 +133,7 @@ const BattleSetupPage = () => {
   };
   
   const proceedToBattle = () => {
-    // Subtract tokens for the wager (will be returned + opponent tokens if win)
-    subtractTokens(tokensWager);
-    
-    // For demo purposes, we'll just create a mock battle with 50/50 win chance
-    const result = Math.random() > 0.5 ? "win" : "loss";
-    
-    // Navigate to result page
+    // Navigate to result page with the link code
     navigate("/battle/results", { 
       state: { 
         battle: {
@@ -146,7 +159,7 @@ const BattleSetupPage = () => {
       <header className="px-4 py-4 sticky top-0 z-10 bg-atl-dark-purple/80 backdrop-blur-sm">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Link to={facilityId ? `/facility/${facilityId}` : "/dashboard"} className="mr-2 text-white">
+            <Link to={facilityId ? `/battle-area/${facilityId}` : "/dashboard"} className="mr-2 text-white">
               <ChevronLeft className="h-5 w-5" />
             </Link>
             <h1 className="text-xl font-bold">Battle Setup</h1>
@@ -332,7 +345,8 @@ const BattleSetupPage = () => {
           </DialogHeader>
           
           <div className="py-4">
-            <div className="bg-white/10 rounded-lg p-4 mb-4">
+            <div className="bg-white/10 rounded-lg p-4 mb-4 flex flex-col items-center">
+              <p className="text-sm text-white/70 mb-2">Both trainers need this code:</p>
               <p className="text-3xl font-mono text-center tracking-widest">{linkCode}</p>
             </div>
             
@@ -350,9 +364,17 @@ const BattleSetupPage = () => {
               </Button>
             </div>
             
-            <p className="text-white/70 text-sm text-center mb-4">
-              Both trainers need to enter this code in their Pokémon Switch game
-            </p>
+            <div className="bg-atl-primary-purple/20 p-3 rounded-lg mb-4">
+              <p className="text-white/90 text-sm">
+                1. Open Pokémon on your Switch
+              </p>
+              <p className="text-white/90 text-sm">
+                2. Go to Link Battle in the menu
+              </p>
+              <p className="text-white/90 text-sm">
+                3. Enter this code when prompted
+              </p>
+            </div>
           </div>
           
           <DialogFooter>

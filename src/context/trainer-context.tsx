@@ -1,3 +1,4 @@
+
 import { 
   ReactNode, 
   createContext, 
@@ -9,7 +10,6 @@ import { Trainer, Badge, Pokemon, Battle, BattleRequest } from "@/types";
 import { mockTrainer, mockBattles } from "@/data/mock-data";
 import { useAuth } from "./auth-context";
 import { toast } from "@/components/ui/sonner";
-import { Award } from "lucide-react";
 import { BadgeAchievementToast } from "@/components/ui/badge-achievement-toast";
 import { mockFacilities } from "@/data/mock-data";
 
@@ -124,7 +124,7 @@ interface TrainerContextType {
   getBattleHistory: () => Battle[];
   createBattleRequest: (request: Omit<BattleRequest, "id" | "createdAt" | "trainerId" | "trainerName" | "trainerAvatar" | "trainerClass" | "status">) => BattleRequest;
   updateBattleRequest: (id: string, updates: Partial<BattleRequest>) => void;
-  acceptBattleRequest: (id: string) => void;
+  acceptBattleRequest: (id: string) => Battle | undefined;
   cancelBattleRequest: (id: string) => void;
   getBattleRequests: () => BattleRequest[];
   getMyBattleRequests: () => BattleRequest[];
@@ -324,6 +324,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     
     updateBattleRequest(id, { status: "accepted" });
     
+    // Generate a link code for this battle
     const linkCode = Math.floor(10000000 + Math.random() * 90000000).toString();
     
     const battle = addBattle({
@@ -338,7 +339,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     
     toast.success(`You accepted a battle with ${request.trainerName}!`);
     
-    toast.info(`Notification sent to ${request.trainerName} about your acceptance`);
+    toast.info(`Link code for this battle: ${linkCode}`);
     
     subtractTokens(request.tokensWagered);
     
@@ -379,15 +380,29 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
   };
 
   const startBattle = (battleId: string) => {
+    // Get the battle
+    const battle = battles.find(b => b.id === battleId);
+    
+    if (!battle) {
+      toast.error("Battle not found");
+      return;
+    }
+    
+    // Update battle status
     setBattles(prev => 
-      prev.map(battle => 
-        battle.id === battleId 
-          ? { ...battle, status: "active" } 
-          : battle
+      prev.map(b => 
+        b.id === battleId 
+          ? { ...b, status: "active" } 
+          : b
       )
     );
     
-    toast.success("Battle started! Good luck!");
+    // Notification about the link code
+    if (battle.linkCode) {
+      toast.info(`Battle started! Link code: ${battle.linkCode}`);
+    } else {
+      toast.success("Battle started! Good luck!");
+    }
   };
 
   const getReadyBattles = () => {
