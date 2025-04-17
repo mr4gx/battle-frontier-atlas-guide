@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Share2, ChevronLeft, User, Star, Award, QrCode } from "lucide-react";
@@ -128,7 +129,7 @@ const PassportPage = () => {
             <Award className="h-5 w-5 mr-2" />
             Frontier Badges
           </h2>
-          <div className="grid grid-cols-5 gap-3 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+          <div className="grid grid-cols-3 gap-3 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
             {trainer.badges.map((badge) => (
               <div key={badge.id} className="flex flex-col items-center">
                 <BadgeIcon 
