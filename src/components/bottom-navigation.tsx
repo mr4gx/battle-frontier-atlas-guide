@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { Home, MapPin, Trophy, User, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,20 +46,20 @@ export function BottomNavigation() {
             className={cn(
               "flex flex-col items-center justify-center py-3 px-2 w-full",
               isActive 
-                ? "text-gray-800" 
-                : "text-gray-500 hover:text-gray-700 transition-colors"
+                ? "text-[#6E6D70]" 
+                : "text-[#8A898C] hover:text-[#6E6D70] transition-colors"
             )}
           >
             <item.icon 
               size={24} 
               className={cn(
-                isActive ? "text-gray-800" : "text-gray-500",
+                isActive ? "text-[#6E6D70]" : "text-[#8A898C]",
                 "mb-1"
               )} 
             />
             <span className={cn(
               "text-xs font-medium",
-              isActive ? "text-gray-800" : "text-gray-500"
+              isActive ? "text-[#6E6D70]" : "text-[#8A898C]"
             )}>
               {item.label}
             </span>
