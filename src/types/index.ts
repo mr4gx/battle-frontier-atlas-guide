@@ -48,6 +48,8 @@ export interface Battle {
   tokensWagered: number;
   date: string;
   notes?: string;
+  linkCode?: string;
+  verificationImage?: string;
 }
 
 export interface BattleRequest {
@@ -64,6 +66,7 @@ export interface BattleRequest {
   notes?: string;
   status: "open" | "accepted" | "completed" | "canceled";
   createdAt: string;
+  opponentId?: string;
 }
 
 export interface Notification {
