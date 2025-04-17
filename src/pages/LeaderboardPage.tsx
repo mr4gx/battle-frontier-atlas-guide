@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Trophy, Sword, Medal, Filter, Search } from "lucide-react";
+import { ChevronLeft, Trophy, Sword, Medal, Filter, Search, Share2, Loader } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,16 @@ import { toast } from "@/components/ui/sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { TokenDisplay } from "@/components/token-display";
 import { Trainer } from "@/types";
+import { useDiscord } from "@/hooks/use-discord";
+import { supabase } from "@/integrations/supabase/client";
 
 const LeaderboardPage = () => {
   const { trainer, getAllTrainers, createBattleRequest } = useTrainer();
+  const { isConnected } = useDiscord();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterClass, setFilterClass] = useState("");
   const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
   const [battleRequest, setBattleRequest] = useState({
     facilityId: "",
     facilityName: "",
@@ -98,6 +102,41 @@ const LeaderboardPage = () => {
     });
     setSelectedTrainer(null);
   };
+
+  const shareToDiscord = async () => {
+    if (!isConnected) {
+      toast.error("Please connect your Discord account first", {
+        description: "Go to your profile to connect Discord",
+        action: {
+          label: "Profile",
+          onClick: () => window.location.href = "/profile"
+        }
+      });
+      return;
+    }
+
+    setIsSharing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('discord-leaderboard', {
+        body: { leaderboardData: filteredTrainers.slice(0, 10) }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success("Leaderboard shared to Discord", {
+        description: "The current leaderboard has been shared to your Discord"
+      });
+    } catch (error) {
+      console.error("Error sharing to Discord:", error);
+      toast.error("Failed to share leaderboard", {
+        description: "Please try again later"
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  };
   
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple text-white">
@@ -109,7 +148,21 @@ const LeaderboardPage = () => {
             </Link>
             <h1 className="text-xl font-bold text-white">Trainer Leaderboard</h1>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+              onClick={shareToDiscord}
+              disabled={isSharing || !isConnected}
+            >
+              {isSharing ? (
+                <Loader className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Share2 className="h-4 w-4 mr-2" />
+              )}
+              Share
+            </Button>
             <TokenDisplay count={trainer.tokens} />
           </div>
         </div>
