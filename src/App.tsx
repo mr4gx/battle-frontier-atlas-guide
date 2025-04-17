@@ -1,7 +1,6 @@
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/auth-context";
@@ -36,46 +35,44 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <TrainerProvider>
-            <BattleLockProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/splash" element={<SplashScreen />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+    <BrowserRouter>
+      <AuthProvider>
+        <TrainerProvider>
+          <BattleLockProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/splash" element={<SplashScreen />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-                {/* Protected routes */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/passport" element={<PassportPage />} />
-                  <Route path="/battle-areas" element={<BattleAreasMapPage />} /> {/* Updated route */}
-                  <Route path="/battle-area/:id" element={<BattleAreaDetailPage />} /> {/* Updated route */}
-                  <Route path="/battle/setup" element={<BattleSetupPage />} />
-                  <Route path="/battle/results" element={<BattleResultsPage />} />
-                  <Route path="/scanner" element={<QRScannerPage />} />
-                  <Route path="/leaderboard" element={<LeaderboardPage />} />
-                  <Route path="/team" element={<TeamManagementPage />} />
-                  <Route path="/battles" element={<BattlesPage />} /> {/* New route */}
-                  <Route path="/battles/history" element={<BattleHistoryPage />} />
-                  <Route path="/notifications" element={<NotificationsPage />} />
-                  <Route path="/bulletin" element={<BattleBulletinPage />} />
-                </Route>
+              {/* Protected routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/passport" element={<PassportPage />} />
+                <Route path="/battle-areas" element={<BattleAreasMapPage />} /> {/* Updated route */}
+                <Route path="/battle-area/:id" element={<BattleAreaDetailPage />} /> {/* Updated route */}
+                <Route path="/battle/setup" element={<BattleSetupPage />} />
+                <Route path="/battle/results" element={<BattleResultsPage />} />
+                <Route path="/scanner" element={<QRScannerPage />} />
+                <Route path="/leaderboard" element={<LeaderboardPage />} />
+                <Route path="/team" element={<TeamManagementPage />} />
+                <Route path="/battles" element={<BattlesPage />} /> {/* New route */}
+                <Route path="/battles/history" element={<BattleHistoryPage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/bulletin" element={<BattleBulletinPage />} />
+              </Route>
 
-                {/* Fallback routes */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BattleLockProvider>
-          </TrainerProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+              {/* Fallback routes */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BattleLockProvider>
+        </TrainerProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 
