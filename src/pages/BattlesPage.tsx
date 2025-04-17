@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Battle } from "@/types";
 import { mockFacilities } from "@/data/mock-data";
 import { toast } from "@/components/ui/sonner";
+import { ReturnToBattleButton } from "@/components/return-to-battle-button";
 
 const BattlesPage = () => {
   const { battles, trainer, startBattle, getReadyBattles, getActiveBattles } = useTrainer();
@@ -52,11 +53,14 @@ const BattlesPage = () => {
     <div className="min-h-screen pb-20">
       {/* Header */}
       <header className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10">
-        <div className="flex items-center">
-          <Link to="/dashboard" className="mr-2">
-            <ChevronLeft className="h-5 w-5" />
-          </Link>
-          <h1 className="text-xl font-bold text-atl-dark-purple">Battles</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Link to="/dashboard" className="mr-2">
+              <ChevronLeft className="h-5 w-5" />
+            </Link>
+            <h1 className="text-xl font-bold text-atl-dark-purple">Battles</h1>
+          </div>
+          <ReturnToBattleButton />
         </div>
       </header>
 

@@ -10,6 +10,7 @@ import { useTrainer } from "@/context/trainer-context";
 import { FacilityCard } from "@/components/ui/facility-card";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ReturnToBattleButton } from "@/components/return-to-battle-button";
 
 const MAX_TOKENS_TO_QUALIFY = 25;
 
@@ -42,7 +43,8 @@ const DashboardPage = () => {
       <header className="px-4 py-4 border-b border-white/10 sticky top-0 z-10 backdrop-blur-md bg-atl-dark-purple/70">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">Dashboard</h1>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
+            <ReturnToBattleButton />
             <TokenDisplay count={trainer.tokens} showAddButton />
             <Link to="/notifications" className="relative">
               <Bell className="h-6 w-6 text-white" />
