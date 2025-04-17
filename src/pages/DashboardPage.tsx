@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Bell, ChevronRight, Award, ExternalLink } from "lucide-react";
@@ -60,14 +59,7 @@ const DashboardPage = () => {
       <main className="p-4">
         {/* Welcome Section */}
         <section className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-white">
-              Welcome, {trainer.name}!
-            </h2>
-            <span className="text-sm text-white/70">ID: {trainer.id}</span>
-          </div>
-
-          <div className="atl-glass-card p-4">
+          <div className="atl-glass-card p-4 bg-white/10 backdrop-blur-sm border border-white/20">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Championship Qualification</span>
               <span className="text-sm text-white/70">{progress}%</span>
@@ -82,16 +74,6 @@ const DashboardPage = () => {
 
         {/* Battle Facilities */}
         <section className="mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold text-white">Battle Facilities</h2>
-            <Link 
-              to="/facilities" 
-              className="text-white/90 text-sm flex items-center"
-            >
-              View All <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-
           <div className="flex overflow-x-auto pb-2 -mx-1 gap-3 hide-scrollbar">
             {mockFacilities.map((facility) => (
               <div key={facility.id} className="w-32 flex-shrink-0">
@@ -110,22 +92,12 @@ const DashboardPage = () => {
 
         {/* Upcoming Battles */}
         <section className="mb-6">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold text-white">Upcoming Battles</h2>
-            <Link 
-              to="/battles" 
-              className="text-white/90 text-sm flex items-center"
-            >
-              History <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-
           {upcomingMatches.length > 0 ? (
             <div className="space-y-3">
               {upcomingMatches.map((match) => (
                 <div 
                   key={match.id} 
-                  className="atl-glass-card p-3 flex justify-between items-center"
+                  className="bg-white/10 backdrop-blur-sm p-3 flex justify-between items-center rounded-lg border border-white/20"
                 >
                   <div>
                     <h3 className="font-medium text-sm">{match.title}</h3>
@@ -141,7 +113,7 @@ const DashboardPage = () => {
               ))}
             </div>
           ) : (
-            <div className="atl-glass-card p-4 text-center">
+            <div className="bg-white/10 backdrop-blur-sm p-4 text-center rounded-lg border border-white/20">
               <p className="text-white/70 text-sm">No upcoming battles</p>
               <Link 
                 to="/battle/setup" 
@@ -155,11 +127,7 @@ const DashboardPage = () => {
 
         {/* Event Updates */}
         <section>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold text-white">Event Updates</h2>
-          </div>
-
-          <div className="atl-glass-card p-4">
+          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2 rounded-lg">
                 <Award className="h-6 w-6 text-white" />
