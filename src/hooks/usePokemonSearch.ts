@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Pokemon } from "@/types";
-import { searchPokemon, getGen9PokemonList, getPokemonDetails, convertToAppFormat } from "@/services/pokemonApi";
+import { searchPokemon, getAllPokemonList, getPokemonDetails, convertToAppFormat } from "@/services/pokemonApi";
 import { useQuery } from "@tanstack/react-query";
 
 export function usePokemonSearch() {
@@ -9,22 +9,40 @@ export function usePokemonSearch() {
   const [searchResults, setSearchResults] = useState<Pokemon[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
-  // Query for popular Gen 9 starter Pokémon (to show when no search term)
-  const gen9StarterIds = [906, 909, 912]; // Sprigatito, Fuecoco, Quaxly
-  const gen9PopularIds = [...gen9StarterIds, 945, 946, 962, 973, 978, 992, 1000, 1001, 1010]; // Add more popular Gen 9 Pokémon
+  // Query for popular Pokémon from various generations (to show when no search term)
+  const popularPokemonIds = [
+    // Gen 1 starters and popular Pokémon
+    1, 4, 7, 25, 133, 143, 150,
+    // Gen 2 favorites
+    152, 155, 158, 196, 249,
+    // Gen 3 standouts
+    252, 255, 258, 384,
+    // Gen 4 picks
+    387, 390, 393, 445, 448,
+    // Gen 5
+    495, 498, 501, 643,
+    // Gen 6
+    650, 653, 656, 719,
+    // Gen 7
+    722, 725, 728, 792,
+    // Gen 8
+    810, 813, 816, 888,
+    // Gen 9
+    906, 909, 912, 1000
+  ];
   
   const { data: popularPokemon, isLoading: isLoadingPopular } = useQuery({
-    queryKey: ['popularGen9Pokemon'],
+    queryKey: ['popularPokemon'],
     queryFn: async () => {
       try {
-        const pokemonPromises = gen9PopularIds.map(async id => {
+        const pokemonPromises = popularPokemonIds.map(async id => {
           const details = await getPokemonDetails(id);
           return convertToAppFormat(details);
         });
         
         return Promise.all(pokemonPromises);
       } catch (error) {
-        console.error("Error fetching popular Gen 9 Pokémon:", error);
+        console.error("Error fetching popular Pokémon:", error);
         return [];
       }
     },

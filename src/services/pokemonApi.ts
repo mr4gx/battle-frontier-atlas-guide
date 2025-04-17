@@ -38,8 +38,13 @@ interface PokemonDetails {
   }[];
 }
 
-// Generation 9 Pokémon (Scarlet & Violet)
-// Pokémon IDs from #906 (Sprigatito) to #1025 (Iron Boulder)
+// We're now including ALL generations
+// Pokémon IDs from #1 (Bulbasaur) to the latest (currently around #1025)
+const POKEMON_MIN_ID = 1;
+// The actual maximum ID might be higher in the future
+const POKEMON_MAX_ID = 1025;
+
+// Generation 9 Pokémon (Scarlet & Violet) constants (kept for backward compatibility)
 const GEN9_MIN_ID = 906;
 const GEN9_MAX_ID = 1025;
 
@@ -88,13 +93,13 @@ const getRandomMoves = (moves: string[], count: number): string[] => {
   return shuffled.slice(0, count);
 };
 
-// Get list of Scarlet & Violet Pokémon (Generation 9)
-export const getGen9PokemonList = async (): Promise<Pokemon[]> => {
+// Get list of all Pokémon (or a specific generation range if provided)
+export const getAllPokemonList = async (minId = POKEMON_MIN_ID, maxId = POKEMON_MAX_ID): Promise<Pokemon[]> => {
   try {
     const pokemonPromises = [];
     
-    // Fetch all Generation 9 Pokémon (from ID 906 to 1025)
-    for (let id = GEN9_MIN_ID; id <= GEN9_MAX_ID; id++) {
+    // Fetch all Pokémon within the ID range
+    for (let id = minId; id <= maxId; id++) {
       pokemonPromises.push(
         getPokemonDetails(id)
           .then(details => convertToAppFormat(details))
@@ -109,17 +114,22 @@ export const getGen9PokemonList = async (): Promise<Pokemon[]> => {
     // Filter out any null results (failed fetches)
     return results.filter(pokemon => pokemon !== null) as Pokemon[];
   } catch (error) {
-    console.error("Error fetching Generation 9 Pokémon:", error);
+    console.error(`Error fetching Pokémon from ID ${minId} to ${maxId}:`, error);
     return [];
   }
 };
 
-// Search for Pokémon by name within Generation 9
+// Get list of Scarlet & Violet Pokémon (Generation 9) - kept for backward compatibility
+export const getGen9PokemonList = async (): Promise<Pokemon[]> => {
+  return getAllPokemonList(GEN9_MIN_ID, GEN9_MAX_ID);
+};
+
+// Search for Pokémon by name across all generations
 export const searchPokemon = async (searchTerm: string): Promise<Pokemon[]> => {
   try {
-    // First try to search within Gen 9 range by ID if the search term is a number
+    // First try to search by ID if the search term is a number
     const numericSearch = parseInt(searchTerm);
-    if (!isNaN(numericSearch) && numericSearch >= GEN9_MIN_ID && numericSearch <= GEN9_MAX_ID) {
+    if (!isNaN(numericSearch) && numericSearch >= POKEMON_MIN_ID && numericSearch <= POKEMON_MAX_ID) {
       try {
         const details = await getPokemonDetails(numericSearch);
         return [convertToAppFormat(details)];
@@ -128,17 +138,13 @@ export const searchPokemon = async (searchTerm: string): Promise<Pokemon[]> => {
       }
     }
     
-    // Get a larger list to search through (all Gen 9 Pokémon) - we can optimize this later
-    const { results } = await getPokemonList(200, GEN9_MIN_ID - 1);
+    // Get a larger list to search through
+    const { results } = await getPokemonList(1000, 0);
     
-    // Filter by search term and only include Gen 9 Pokémon
-    const filteredResults = results.filter(pokemon => {
-      // Extract ID from URL to check if it's in Gen 9 range
-      const urlParts = pokemon.url.split('/');
-      const id = parseInt(urlParts[urlParts.length - 2]);
-      return pokemon.name.includes(searchTerm.toLowerCase()) && 
-             id >= GEN9_MIN_ID && id <= GEN9_MAX_ID;
-    });
+    // Filter by search term
+    const filteredResults = results.filter(pokemon => 
+      pokemon.name.includes(searchTerm.toLowerCase())
+    );
     
     // Limit to first 20 results to avoid too many API calls
     const limitedResults = filteredResults.slice(0, 20);
@@ -151,7 +157,7 @@ export const searchPokemon = async (searchTerm: string): Promise<Pokemon[]> => {
     
     return Promise.all(pokemonPromises);
   } catch (error) {
-    console.error("Error searching Generation 9 Pokémon:", error);
+    console.error("Error searching Pokémon:", error);
     return [];
   }
 };
