@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Bell, ChevronRight, Award, ExternalLink, Sword } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Bell, ChevronRight, Award, ExternalLink, Sword, Scan } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { TokenDisplay } from "@/components/token-display";
 import { Progress } from "@/components/ui/progress";
@@ -11,12 +11,14 @@ import { FacilityCard } from "@/components/ui/facility-card";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ReturnToBattleButton } from "@/components/return-to-battle-button";
+import { Button } from "@/components/ui/button";
 
 const MAX_TOKENS_TO_QUALIFY = 25;
 
 const DashboardPage = () => {
   const { trainer, isLoading } = useTrainer();
   const [progress, setProgress] = useState(0);
+  const navigate = useNavigate();
   
   useEffect(() => {
     if (trainer) {
@@ -29,6 +31,15 @@ const DashboardPage = () => {
   const upcomingMatches = mockNotifications
     .filter(notif => notif.type === "battle" && !notif.read)
     .slice(0, 3);
+
+  const handleChallengeNow = () => {
+    navigate("/scanner", { 
+      state: { 
+        returnTo: "/battle/setup",
+        forBattleChallenge: true 
+      } 
+    });
+  };
 
   if (isLoading || !trainer) {
     return (
@@ -44,6 +55,15 @@ const DashboardPage = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">Dashboard</h1>
           <div className="flex items-center space-x-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleChallengeNow}
+              className="border-white/20 text-white hover:bg-white/20 hover:text-white flex items-center gap-1"
+            >
+              <Scan className="h-4 w-4" />
+              <span className="hidden sm:inline">Challenge Now</span>
+            </Button>
             <ReturnToBattleButton />
             <TokenDisplay count={trainer.tokens} showAddButton />
             <Link to="/notifications" className="relative">
