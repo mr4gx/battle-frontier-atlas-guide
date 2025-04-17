@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, User, Edit, CheckCheck, Award, Discord } from "lucide-react";
+import { ChevronLeft, User, Edit, CheckCheck, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BottomNavigation } from "@/components/bottom-navigation";
