@@ -32,6 +32,11 @@ export function BattleLockProvider({ children }: { children: ReactNode }) {
   const unlockNavigation = () => {
     setIsLocked(false);
     setActiveBattleRoute(null);
+    
+    // If we're still on the battle results page when unlocking, redirect to dashboard
+    if (location.pathname === '/battle/results') {
+      navigate('/dashboard');
+    }
   };
 
   // If navigation is locked and we try to navigate away, prevent it

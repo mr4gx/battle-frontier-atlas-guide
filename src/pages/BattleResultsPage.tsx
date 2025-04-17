@@ -150,14 +150,12 @@ const BattleResultsPage = () => {
     toast.success("Battle result saved successfully!");
     setSaveComplete(true);
     unlockNavigation();
+    
+    navigate("/dashboard");
   };
   
   const handleReturn = () => {
-    if (battle.facilityId) {
-      navigate(`/facility/${battle.facilityId}`);
-    } else {
-      navigate("/dashboard");
-    }
+    navigate("/dashboard");
   };
   
   if (!trainer) return null;
