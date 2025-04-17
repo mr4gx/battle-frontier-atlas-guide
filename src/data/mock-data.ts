@@ -1,4 +1,3 @@
-
 import { Trainer, Facility, Badge, Battle, Notification, Tournament, Pokemon } from "@/types";
 
 export const mockTrainer: Trainer = {
@@ -12,8 +11,6 @@ export const mockTrainer: Trainer = {
     { id: "b1", name: "Battle Arena", facilityId: "f1", obtained: true, dateObtained: "2025-04-12" },
     { id: "b2", name: "Battle Factory", facilityId: "f2", obtained: true, dateObtained: "2025-04-13" },
     { id: "b3", name: "Battle Palace", facilityId: "f3", obtained: false },
-    { id: "b4", name: "Battle Tower", facilityId: "f4", obtained: false },
-    { id: "b5", name: "Battle Pyramid", facilityId: "f5", obtained: false },
   ],
   tokens: 35,
   team: [
@@ -60,28 +57,6 @@ export const mockFacilities: Facility[] = [
     entryRequirements: ["Min. 15 Battle Tokens", "Factory Badge"],
     badgeId: "b3",
     status: "available"
-  },
-  {
-    id: "f4",
-    name: "Battle Tower",
-    description: "Face increasingly difficult trainers in consecutive battles.",
-    image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=300&h=170",
-    battleStyle: "Single Battle",
-    rules: ["Level 50 Pokémon", "No healing between battles", "7 consecutive wins required"],
-    entryRequirements: ["Min. 20 Battle Tokens", "Palace Badge"],
-    badgeId: "b4",
-    status: "locked"
-  },
-  {
-    id: "f5",
-    name: "Battle Pyramid",
-    description: "Navigate a dark maze while battling trainers and wild Pokémon.",
-    image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=300&h=170",
-    battleStyle: "Single Battle",
-    rules: ["Limited visibility", "Wild Pokémon encounters", "Find the exit to progress"],
-    entryRequirements: ["Min. 25 Battle Tokens", "Tower Badge"],
-    badgeId: "b5",
-    status: "locked"
   }
 ];
 

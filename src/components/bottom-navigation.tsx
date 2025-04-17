@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Map, Trophy, User, FileText } from "lucide-react";
+import { Home, MapPin, Trophy, User, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomNavigation() {
@@ -13,9 +13,9 @@ export function BottomNavigation() {
       href: "/dashboard",
     },
     {
-      label: "Facilities",
-      icon: Map,
-      href: "/facilities",
+      label: "Battle Areas", // Changed from Facilities
+      icon: MapPin, // Changed from Map
+      href: "/battle-areas", // Changed from facilities
     },
     {
       label: "Bulletin",

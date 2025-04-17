@@ -14,8 +14,8 @@ import RegisterPage from "@/pages/RegisterPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ProfilePage from "@/pages/ProfilePage";
 import PassportPage from "@/pages/PassportPage";
-import FacilitiesMapPage from "@/pages/FacilitiesMapPage";
-import FacilityDetailPage from "@/pages/FacilityDetailPage";
+import BattleAreasMapPage from "@/pages/BattleAreasMapPage"; // Renamed from FacilitiesMapPage
+import BattleAreaDetailPage from "@/pages/BattleAreaDetailPage"; // Renamed from FacilityDetailPage
 import BattleSetupPage from "@/pages/BattleSetupPage";
 import BattleResultsPage from "@/pages/BattleResultsPage";
 import QRScannerPage from "@/pages/QRScannerPage";
@@ -52,8 +52,8 @@ const App = () => (
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/passport" element={<PassportPage />} />
-                <Route path="/facilities" element={<FacilitiesMapPage />} />
-                <Route path="/facility/:id" element={<FacilityDetailPage />} />
+                <Route path="/battle-areas" element={<BattleAreasMapPage />} /> {/* Updated route */}
+                <Route path="/battle-area/:id" element={<BattleAreaDetailPage />} /> {/* Updated route */}
                 <Route path="/battle/setup" element={<BattleSetupPage />} />
                 <Route path="/battle/results" element={<BattleResultsPage />} />
                 <Route path="/scanner" element={<QRScannerPage />} />
