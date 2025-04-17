@@ -10,6 +10,71 @@ import { mockTrainer, mockBattles } from "@/data/mock-data";
 import { useAuth } from "./auth-context";
 import { toast } from "@/components/ui/sonner";
 
+// Mock trainers data for leaderboard
+const mockTrainers: Trainer[] = [
+  mockTrainer,
+  {
+    id: "T54321",
+    name: "Gary Oak",
+    avatar: "/assets/trainers/blue.png",
+    trainerClass: "Rival",
+    wins: 12,
+    losses: 3,
+    badges: [],
+    tokens: 45,
+    team: [],
+    achievementBadges: []
+  },
+  {
+    id: "T98765",
+    name: "Misty",
+    avatar: "/assets/trainers/misty.png",
+    trainerClass: "Gym Leader",
+    wins: 10,
+    losses: 5,
+    badges: [],
+    tokens: 30,
+    team: [],
+    achievementBadges: []
+  },
+  {
+    id: "T24680",
+    name: "Brock",
+    avatar: "/assets/trainers/brock.png",
+    trainerClass: "Gym Leader",
+    wins: 8,
+    losses: 4,
+    badges: [],
+    tokens: 25,
+    team: [],
+    achievementBadges: []
+  },
+  {
+    id: "T13579",
+    name: "Dawn",
+    avatar: "/assets/trainers/dawn.png",
+    trainerClass: "Coordinator",
+    wins: 7,
+    losses: 6,
+    badges: [],
+    tokens: 20,
+    team: [],
+    achievementBadges: []
+  },
+  {
+    id: "T11111",
+    name: "Cynthia",
+    avatar: "/assets/trainers/cynthia.png",
+    trainerClass: "Champion",
+    wins: 15,
+    losses: 1,
+    badges: [],
+    tokens: 50,
+    team: [],
+    achievementBadges: []
+  }
+];
+
 const mockBattleRequests: BattleRequest[] = [
   {
     id: "br1",
@@ -61,6 +126,7 @@ interface TrainerContextType {
   cancelBattleRequest: (id: string) => void;
   getBattleRequests: () => BattleRequest[];
   getMyBattleRequests: () => BattleRequest[];
+  getAllTrainers: () => Trainer[];
 }
 
 const TrainerContext = createContext<TrainerContextType | undefined>(undefined);
@@ -251,6 +317,10 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   };
 
+  const getAllTrainers = () => {
+    return mockTrainers;
+  };
+
   return (
     <TrainerContext.Provider
       value={{
@@ -271,7 +341,8 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
         acceptBattleRequest,
         cancelBattleRequest,
         getBattleRequests,
-        getMyBattleRequests
+        getMyBattleRequests,
+        getAllTrainers
       }}
     >
       {children}

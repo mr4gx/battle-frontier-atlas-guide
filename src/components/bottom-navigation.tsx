@@ -35,7 +35,7 @@ export function BottomNavigation() {
   ];
   
   return (
-    <nav className="atl-bottom-nav z-50">
+    <nav className="atl-bottom-nav z-50 bg-white/10 backdrop-blur-md border-t border-white/10">
       {navItems.map((item) => {
         const isActive = location.pathname === item.href;
         
@@ -51,11 +51,16 @@ export function BottomNavigation() {
             <item.icon 
               size={24} 
               className={cn(
-                isActive ? "text-atl-primary-purple" : "text-gray-500",
+                isActive ? "text-white" : "text-white/60",
                 "mb-1"
               )} 
             />
-            <span className="text-xs">{item.label}</span>
+            <span className={cn(
+              "text-xs",
+              isActive ? "text-white" : "text-white/60"
+            )}>
+              {item.label}
+            </span>
           </Link>
         );
       })}
