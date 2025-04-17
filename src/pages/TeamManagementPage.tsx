@@ -142,7 +142,7 @@ const TeamManagementPage = () => {
               key={index}
               className="bg-white p-3 rounded-lg shadow-sm border border-gray-100"
             >
-              <div className="flex">
+              <div className="flex items-center">
                 <div className="w-16 h-16 flex-shrink-0">
                   {pokemon.id > 0 ? (
                     <PokemonSprite 
@@ -167,8 +167,8 @@ const TeamManagementPage = () => {
                 </div>
                 
                 <div className="ml-3 flex-1">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-medium text-sm">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-medium">
                       {pokemon.id > 0 ? pokemon.name : "Empty Slot"}
                     </h3>
                     
@@ -183,19 +183,9 @@ const TeamManagementPage = () => {
                   </div>
                   
                   {pokemon.id > 0 && (
-                    <>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Lv. {pokemon.level}
-                      </div>
-                      
-                      <div className="mt-2 grid grid-cols-2 gap-1">
-                        {pokemon.moves.slice(0, 4).map((move, i) => (
-                          <div key={i} className="text-xs bg-gray-100 px-1 py-0.5 rounded truncate">
-                            {move}
-                          </div>
-                        ))}
-                      </div>
-                    </>
+                    <div className="text-sm text-gray-500 mt-1">
+                      Lv. {pokemon.level}
+                    </div>
                   )}
                 </div>
               </div>
