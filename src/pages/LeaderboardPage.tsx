@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Trophy, Sword, Medal, Filter, Search } from "lucide-react";
@@ -29,7 +28,6 @@ const LeaderboardPage = () => {
     notes: ""
   });
   
-  // Mock facilities data for selecting in the battle request form
   const facilities = [
     { id: "f1", name: "Battle Tower", battleStyle: "Singles" },
     { id: "f2", name: "Battle Dome", battleStyle: "Singles" },
@@ -40,7 +38,6 @@ const LeaderboardPage = () => {
   
   const allTrainers = getAllTrainers().sort((a, b) => b.tokens - a.tokens);
   
-  // Filter trainers based on search and class filter
   const filteredTrainers = allTrainers.filter(t => {
     const matchesSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          t.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -48,13 +45,10 @@ const LeaderboardPage = () => {
     return matchesSearch && matchesClass;
   });
   
-  // Get all unique trainer classes for the filter
   const trainerClasses = [...new Set(allTrainers.map(t => t.trainerClass))];
   
-  // Get the rank of the current trainer
   const currentTrainerRank = allTrainers.findIndex(t => t.id === trainer.id) + 1;
   
-  // Get medal type based on rank
   const getMedalType = (rank: number) => {
     if (rank === 1) return "text-yellow-400";
     if (rank === 2) return "text-gray-400";
@@ -62,12 +56,11 @@ const LeaderboardPage = () => {
     return "text-gray-500";
   };
   
-  // Handle selecting a trainer for battle
   const handleSelectTrainer = (selectedTrainer: Trainer) => {
     setSelectedTrainer(selectedTrainer);
+    toast.info(`${selectedTrainer.name} will be notified when you send a challenge`);
   };
   
-  // Handle facility selection in the form
   const handleFacilityChange = (facilityId: string) => {
     const facility = facilities.find(f => f.id === facilityId);
     if (facility) {
@@ -80,9 +73,7 @@ const LeaderboardPage = () => {
     }
   };
   
-  // Handle submitting a battle request
   const handleSubmitRequest = () => {
-    // Validate the form
     if (!battleRequest.facilityId || !battleRequest.time || battleRequest.tokensWagered < 1) {
       toast.error("Please fill out all required fields");
       return;
@@ -97,7 +88,6 @@ const LeaderboardPage = () => {
     
     toast.success(`Battle request sent to ${selectedTrainer.name}`);
     
-    // Reset form
     setBattleRequest({
       facilityId: "",
       facilityName: "",
@@ -111,7 +101,6 @@ const LeaderboardPage = () => {
   
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple text-white">
-      {/* Header */}
       <header className="bg-white/10 backdrop-blur-md px-4 py-4 border-b border-white/10 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -127,7 +116,6 @@ const LeaderboardPage = () => {
       </header>
 
       <main className="p-4">
-        {/* Search and Filter */}
         <div className="flex items-center gap-2 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -185,7 +173,6 @@ const LeaderboardPage = () => {
           </Sheet>
         </div>
         
-        {/* Current Trainer Rank */}
         <div className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-4 mb-4">
           <div className="flex justify-between items-center">
             <div>
@@ -203,7 +190,6 @@ const LeaderboardPage = () => {
           </div>
         </div>
         
-        {/* Leaderboard */}
         <div className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 overflow-hidden">
           <div className="px-4 py-3 border-b border-white/20 flex justify-between items-center">
             <h2 className="font-semibold text-white">Top Trainers</h2>
