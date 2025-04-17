@@ -35,9 +35,9 @@ export function BottomNavigation() {
       href: "/leaderboard",
     },
     {
-      label: "Profile",
+      label: "Passport", // Changed from "Profile"
       icon: User,
-      href: "/profile",
+      href: "/profile", // Keeping the href the same as it points to the correct route
     },
   ];
   
