@@ -1,15 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Zap, ZapOff } from "lucide-react";
+import { ChevronLeft, Zap, ZapOff, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BottomNavigation } from "@/components/bottom-navigation";
+import { useTrainer } from "@/context/trainer-context";
+import { toast } from "@/components/ui/sonner";
 
 const QRScannerPage = () => {
+  const { getTrainerByIdOrName } = useTrainer();
   const location = useLocation();
   const navigate = useNavigate();
   const returnTo = location.state?.returnTo || "/dashboard";
+  const isBattleChallenge = location.state?.forBattleChallenge || false;
   
   const [isScanning, setIsScanning] = useState(true);
   const [manualEntry, setManualEntry] = useState("");
@@ -53,16 +57,32 @@ const QRScannerPage = () => {
     e.preventDefault();
     if (!manualEntry) return;
     
-    // Format: ID|Name
-    const result = `T${Math.floor(Math.random() * 90000) + 10000}|${manualEntry}`;
-    setScanResult(result);
-    setIsScanning(false);
+    // Check if the entry is a valid trainer
+    const trainer = getTrainerByIdOrName(manualEntry);
     
-    // Add to recent scans
-    setRecentScans(prev => {
-      const newScans = [result, ...prev];
-      return newScans.slice(0, 5); // Keep only last 5
-    });
+    if (trainer) {
+      // Format: ID|Name
+      const result = `${trainer.id}|${trainer.name}`;
+      setScanResult(result);
+      setIsScanning(false);
+      
+      // Add to recent scans
+      setRecentScans(prev => {
+        const newScans = [result, ...prev];
+        return newScans.slice(0, 5); // Keep only last 5
+      });
+    } else {
+      // Format: ID|Name (using the manual entry as the name)
+      const result = `T${Math.floor(Math.random() * 90000) + 10000}|${manualEntry}`;
+      setScanResult(result);
+      setIsScanning(false);
+      
+      // Add to recent scans
+      setRecentScans(prev => {
+        const newScans = [result, ...prev];
+        return newScans.slice(0, 5); // Keep only last 5
+      });
+    }
   };
   
   const handleUseResult = () => {
@@ -71,13 +91,24 @@ const QRScannerPage = () => {
     // Parse result
     const [id, name] = scanResult.split("|");
     
-    // Navigate back with the result
-    navigate(returnTo, { 
-      state: { 
-        scannedOpponentId: id,
-        scannedOpponentName: name
-      } 
-    });
+    if (isBattleChallenge) {
+      // Navigate to battle setup with the opponent info
+      navigate("/battle/setup", { 
+        state: { 
+          challengeMode: true,
+          opponentId: id,
+          opponentName: name
+        } 
+      });
+    } else {
+      // Navigate back with the result
+      navigate(returnTo, { 
+        state: { 
+          scannedOpponentId: id,
+          scannedOpponentName: name
+        } 
+      });
+    }
   };
   
   const toggleFlash = () => {
@@ -93,7 +124,9 @@ const QRScannerPage = () => {
             <Link to={returnTo} className="mr-2">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-xl font-bold text-atl-dark-purple">QR Scanner</h1>
+            <h1 className="text-xl font-bold text-atl-dark-purple">
+              {isBattleChallenge ? "Scan Trainer QR" : "QR Scanner"}
+            </h1>
           </div>
           <Button 
             variant={flashOn ? "default" : "outline"} 
@@ -107,6 +140,11 @@ const QRScannerPage = () => {
             )}
           </Button>
         </div>
+        {isBattleChallenge && (
+          <p className="text-sm text-gray-500 mt-1">
+            Scan a trainer's passport QR code to challenge them to a battle
+          </p>
+        )}
       </header>
 
       <main className="p-4 flex flex-col items-center">
@@ -171,7 +209,7 @@ const QRScannerPage = () => {
                       className="bg-atl-primary-purple hover:bg-atl-secondary-purple"
                       onClick={handleUseResult}
                     >
-                      Use Result
+                      {isBattleChallenge ? "Challenge" : "Use Result"}
                     </Button>
                   </div>
                 </>
@@ -198,7 +236,7 @@ const QRScannerPage = () => {
           <h2 className="text-lg font-semibold mb-3">Manual Entry</h2>
           <form onSubmit={handleManualSubmit} className="flex gap-2">
             <Input
-              placeholder="Enter trainer name"
+              placeholder={isBattleChallenge ? "Enter trainer name or ID" : "Enter trainer name"}
               value={manualEntry}
               onChange={(e) => setManualEntry(e.target.value)}
               className="flex-1"
@@ -239,15 +277,25 @@ const QRScannerPage = () => {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(returnTo, { 
-                          state: { 
-                            scannedOpponentId: id,
-                            scannedOpponentName: name
-                          } 
-                        });
+                        if (isBattleChallenge) {
+                          navigate("/battle/setup", { 
+                            state: { 
+                              challengeMode: true,
+                              opponentId: id,
+                              opponentName: name
+                            } 
+                          });
+                        } else {
+                          navigate(returnTo, { 
+                            state: { 
+                              scannedOpponentId: id,
+                              scannedOpponentName: name
+                            } 
+                          });
+                        }
                       }}
                     >
-                      Use
+                      {isBattleChallenge ? "Challenge" : "Use"}
                     </Button>
                   </div>
                 );

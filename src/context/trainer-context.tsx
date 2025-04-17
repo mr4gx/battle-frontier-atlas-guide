@@ -1,4 +1,3 @@
-
 import { 
   ReactNode, 
   createContext, 
@@ -134,6 +133,8 @@ interface TrainerContextType {
   getActiveBattles: () => Battle[];
   checkBadgeAchievements: (facilityId: string) => void;
   getBattlesByFacility: (facilityId: string) => Battle[];
+  getTrainerByIdOrName: (idOrName: string) => Trainer | undefined;
+  hasPendingBattleRequestFrom: (trainerId: string) => boolean;
 }
 
 const TrainerContext = createContext<TrainerContextType | undefined>(undefined);
@@ -301,7 +302,9 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     
     setBattleRequests(prev => [newBattleRequest, ...prev]);
     
-    toast.success("Battle request posted successfully!");
+    toast.success("Battle request sent successfully!");
+
+    toast.info(`Battle request sent to ${request.opponentId ? `trainer ID: ${request.opponentId}` : "opponent"}`);
     
     return newBattleRequest;
   };
@@ -324,7 +327,6 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     
     updateBattleRequest(id, { status: "accepted" });
     
-    // Generate a link code for this battle
     const linkCode = Math.floor(10000000 + Math.random() * 90000000).toString();
     
     const battle = addBattle({
@@ -379,8 +381,29 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     return mockTrainers;
   };
 
+  const getTrainerByIdOrName = (idOrName: string) => {
+    const allTrainers = getAllTrainers();
+    
+    let foundTrainer = allTrainers.find(t => t.id === idOrName);
+    
+    if (!foundTrainer) {
+      foundTrainer = allTrainers.find(t => 
+        t.name.toLowerCase() === idOrName.toLowerCase()
+      );
+    }
+    
+    return foundTrainer;
+  };
+
+  const hasPendingBattleRequestFrom = (trainerId: string) => {
+    return battleRequests.some(request => 
+      request.trainerId === trainerId && 
+      request.status === "open" &&
+      (request.opponentId === trainer?.id || !request.opponentId)
+    );
+  };
+
   const startBattle = (battleId: string) => {
-    // Get the battle
     const battle = battles.find(b => b.id === battleId);
     
     if (!battle) {
@@ -388,7 +411,6 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       return;
     }
     
-    // Update battle status
     setBattles(prev => 
       prev.map(b => 
         b.id === battleId 
@@ -397,7 +419,6 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       )
     );
     
-    // Notification about the link code
     if (battle.linkCode) {
       toast.info(`Battle started! Link code: ${battle.linkCode}`);
     } else {
@@ -441,7 +462,9 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
         getReadyBattles,
         getActiveBattles,
         checkBadgeAchievements,
-        getBattlesByFacility
+        getBattlesByFacility,
+        getTrainerByIdOrName,
+        hasPendingBattleRequestFrom
       }}
     >
       {children}

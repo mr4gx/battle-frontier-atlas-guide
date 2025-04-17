@@ -1,14 +1,18 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ChevronLeft, Bell, BadgeCheck, CheckCheck } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronLeft, Bell, BadgeCheck, CheckCheck, Shield, X, Clock } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { Button } from "@/components/ui/button";
 import { mockNotifications } from "@/data/mock-data";
 import { cn } from "@/lib/utils";
+import { useTrainer } from "@/context/trainer-context";
+import { toast } from "@/components/ui/sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const NotificationsPage = () => {
+  const { battleRequests, acceptBattleRequest, cancelBattleRequest } = useTrainer();
   const [notifications, setNotifications] = useState(mockNotifications);
+  const navigate = useNavigate();
   
   const getIcon = (type: string) => {
     switch (type) {
@@ -98,6 +102,12 @@ const NotificationsPage = () => {
             </svg>
           </div>
         );
+      case "battle_request":
+        return (
+          <div className="bg-red-100 p-2 rounded-full">
+            <Shield className="h-4 w-4 text-red-500" />
+          </div>
+        );
       default:
         return (
           <div className="bg-gray-100 p-2 rounded-full">
@@ -116,6 +126,20 @@ const NotificationsPage = () => {
       notif.id === id ? { ...notif, read: true } : notif
     ));
   };
+
+  const handleAcceptBattleRequest = (requestId: string) => {
+    const battle = acceptBattleRequest(requestId);
+    if (battle) {
+      navigate("/battle/results", { 
+        state: { battle } 
+      });
+    }
+  };
+
+  const handleRejectBattleRequest = (requestId: string) => {
+    cancelBattleRequest(requestId);
+    toast.info("Battle request rejected");
+  };
   
   // Sort notifications by date (newest first) and read status (unread first)
   const sortedNotifications = [...notifications].sort((a, b) => {
@@ -126,6 +150,11 @@ const NotificationsPage = () => {
     // Then by date
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
+
+  // Get open battle requests
+  const openBattleRequests = battleRequests.filter(
+    request => request.status === "open"
+  );
   
   return (
     <div className="min-h-screen pb-20">
@@ -151,7 +180,87 @@ const NotificationsPage = () => {
       </header>
 
       <main className="p-4">
-        {/* Notifications List */}
+        {/* Battle Requests Section */}
+        {openBattleRequests.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold mb-3 flex items-center">
+              <Shield className="h-5 w-5 mr-2 text-atl-primary-purple" />
+              Battle Requests
+            </h2>
+            
+            <div className="space-y-3">
+              {openBattleRequests.map((request) => (
+                <div 
+                  key={request.id}
+                  className="bg-white rounded-lg shadow-sm border-l-4 border-l-atl-primary-purple p-4"
+                >
+                  <div className="flex items-start">
+                    <Avatar className="h-10 w-10 mr-3">
+                      {request.trainerAvatar ? (
+                        <AvatarImage src={request.trainerAvatar} alt={request.trainerName} />
+                      ) : (
+                        <AvatarFallback className="bg-atl-primary-purple text-white">
+                          {request.trainerName.charAt(0)}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium">
+                          {request.trainerName} 
+                          <span className="text-sm text-gray-500 ml-1">({request.trainerClass})</span>
+                        </h3>
+                        
+                        <div className="text-xs text-gray-500 flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {new Date(request.createdAt).toLocaleTimeString()}
+                        </div>
+                      </div>
+                      
+                      <div className="text-sm mt-1">
+                        <p>Requesting a {request.battleStyle} battle at {request.facilityName}.</p>
+                        <p className="font-medium text-atl-primary-purple mt-1">
+                          Tokens Wagered: {request.tokensWagered}
+                        </p>
+                        {request.notes && (
+                          <p className="text-gray-600 mt-1">"{request.notes}"</p>
+                        )}
+                      </div>
+                      
+                      <div className="flex justify-end gap-2 mt-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs border-red-500 text-red-500 hover:bg-red-50"
+                          onClick={() => handleRejectBattleRequest(request.id)}
+                        >
+                          <X className="h-3 w-3 mr-1" />
+                          Decline
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="text-xs bg-atl-primary-purple hover:bg-atl-secondary-purple"
+                          onClick={() => handleAcceptBattleRequest(request.id)}
+                        >
+                          <CheckCheck className="h-3 w-3 mr-1" />
+                          Accept
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Other Notifications */}
+        <h2 className="text-lg font-semibold mb-3 flex items-center">
+          <Bell className="h-5 w-5 mr-2 text-gray-700" />
+          Notifications
+        </h2>
+        
         <div className="space-y-3">
           {sortedNotifications.length > 0 ? (
             sortedNotifications.map((notification) => (

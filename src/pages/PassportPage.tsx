@@ -1,6 +1,6 @@
-
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Share2, ChevronLeft, User, Star, Award } from "lucide-react";
+import { Share2, ChevronLeft, User, Star, Award, QrCode } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { TokenDisplay } from "@/components/token-display";
 import { BadgeIcon } from "@/components/ui/badge-icon";
@@ -9,9 +9,12 @@ import { useTrainer } from "@/context/trainer-context";
 import { mockFacilities } from "@/data/mock-data";
 import { PokemonSprite } from "@/components/pokemon-sprite";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 
 const PassportPage = () => {
   const { trainer, isLoading } = useTrainer();
+  const [showQRCode, setShowQRCode] = useState(false);
   
   if (isLoading || !trainer) {
     return (
@@ -27,6 +30,10 @@ const PassportPage = () => {
     trainer.badges.some(b => b.facilityId === facility.id && b.obtained)
   ).length;
 
+  const handleShareQRCode = () => {
+    setShowQRCode(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple text-white pb-20">
       {/* Header */}
@@ -38,10 +45,20 @@ const PassportPage = () => {
             </Link>
             <h1 className="text-xl font-bold">Digital Passport</h1>
           </div>
-          <Button variant="ghost" size="sm" className="gap-1 text-white">
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-1 text-white"
+              onClick={handleShareQRCode}
+            >
+              <QrCode className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" className="gap-1 text-white">
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -64,6 +81,16 @@ const PassportPage = () => {
               <div className="text-sm text-white/80">{trainer.trainerClass}</div>
               <div className="text-xs text-white/60">ID: {trainer.id}</div>
             </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/20 text-white hover:bg-white/10"
+              onClick={handleShareQRCode}
+            >
+              <QrCode className="h-4 w-4 mr-1" />
+              Battle Me
+            </Button>
           </div>
           
           {/* Stats Summary */}
@@ -229,6 +256,61 @@ const PassportPage = () => {
       </main>
 
       <BottomNavigation />
+      
+      {/* QR Code Dialog */}
+      <Dialog open={showQRCode} onOpenChange={setShowQRCode}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-center">Battle Challenge QR Code</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center py-4">
+            <div className="w-64 h-64 border border-gray-200 rounded-lg mb-4 flex items-center justify-center bg-white">
+              <MockQRCode trainerId={trainer.id} name={trainer.name} />
+              <p className="text-xs text-gray-500 mt-2">Scan to challenge</p>
+            </div>
+            
+            <div className="text-center text-sm text-gray-600 max-w-xs">
+              <p>Other trainers can scan this QR code to challenge you to a battle</p>
+            </div>
+            
+            <div className="mt-4">
+              <Button 
+                onClick={() => {
+                  toast.success("QR Code copied to clipboard");
+                  setShowQRCode(false);
+                }}
+                className="bg-atl-primary-purple hover:bg-atl-secondary-purple"
+              >
+                Copy QR Code
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// Simplified QR code mockup
+const MockQRCode = ({ trainerId, name }: { trainerId: string; name: string }) => {
+  return (
+    <div className="w-48 h-48 bg-white relative flex items-center justify-center">
+      <div className="w-40 h-40 border-2 border-black">
+        <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-black"></div>
+        <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-black"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-black"></div>
+        <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-black"></div>
+        
+        <div className="w-full h-full flex flex-col items-center justify-center">
+          <div className="w-20 h-20 bg-black m-2 flex items-center justify-center">
+            <div className="w-14 h-14 bg-white flex items-center justify-center">
+              <div className="w-8 h-8 bg-black"></div>
+            </div>
+          </div>
+          <span className="text-xs font-mono mt-1">{trainerId}</span>
+        </div>
+      </div>
     </div>
   );
 };

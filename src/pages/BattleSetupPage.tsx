@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const BattleSetupPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { trainer, subtractTokens, createBattleRequest } = useTrainer();
+  const { trainer, subtractTokens, createBattleRequest, hasPendingBattleRequestFrom } = useTrainer();
   
   const facilityId = location.state?.facilityId;
   const facility = facilityId ? mockFacilities.find(f => f.id === facilityId) : null;
@@ -34,7 +34,7 @@ const BattleSetupPage = () => {
   const [isChallengeMode, setIsChallengeMode] = useState(false);
   
   useEffect(() => {
-    // Check if we're in challenge mode (from leaderboard)
+    // Check if we're in challenge mode (from leaderboard or QR scan)
     if (location.state?.challengeMode) {
       setIsChallengeMode(true);
       if (location.state.opponentName) setOpponentName(location.state.opponentName);
@@ -103,12 +103,18 @@ const BattleSetupPage = () => {
       return;
     }
     
+    // Check if there's already a pending request to this opponent
+    if (opponentId && hasPendingBattleRequestFrom(trainer.id)) {
+      toast.error("You already have a pending battle request with this trainer");
+      return;
+    }
+    
     if (isChallengeMode) {
       // Create battle request
       try {
         const request = createBattleRequest({
           facilityId: facilityId || "",
-          facilityName: facility?.name || "Unknown Facility",
+          facilityName: facility?.name || "Battle Arena",
           battleStyle: battleFormat,
           time: new Date().toISOString(),
           tokensWagered: tokensWager,
@@ -120,7 +126,7 @@ const BattleSetupPage = () => {
         const code = Math.floor(10000000 + Math.random() * 90000000).toString();
         setLinkCode(code);
         
-        toast.success("Battle request sent! Waiting for opponent to accept.");
+        toast.success(`Battle request sent to ${opponentName}!`);
         // Show link code dialog even for challenge mode
         setShowLinkCodeDialog(true);
       } catch (error) {
@@ -143,14 +149,19 @@ const BattleSetupPage = () => {
           result: "pending",
           tokensWagered: tokensWager,
           linkCode: linkCode,
-          notes: `${battleFormat} battle at ${facility?.name || 'unknown location'}`
+          notes: `${battleFormat} battle at ${facility?.name || 'Unknown Location'}`
         } 
       }
     });
   };
   
   const handleScanQR = () => {
-    navigate("/scanner", { state: { returnTo: "/battle/setup" } });
+    navigate("/scanner", { 
+      state: { 
+        returnTo: "/battle/setup",
+        forBattleChallenge: true 
+      } 
+    });
   };
   
   return (
@@ -162,7 +173,9 @@ const BattleSetupPage = () => {
             <Link to={facilityId ? `/battle-area/${facilityId}` : "/dashboard"} className="mr-2 text-white">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-xl font-bold">Battle Setup</h1>
+            <h1 className="text-xl font-bold">
+              {isChallengeMode ? "Challenge Trainer" : "Battle Setup"}
+            </h1>
           </div>
           <TokenDisplay count={trainer.tokens} showAddButton={false} className="bg-white/20 text-white" />
         </div>
@@ -202,10 +215,15 @@ const BattleSetupPage = () => {
                     Scan
                   </Button>
                 </div>
+                {isChallengeMode && (
+                  <p className="mt-1 text-xs text-white/70">
+                    Challenging {opponentName} to a battle
+                  </p>
+                )}
               </div>
               
               <div>
-                <Label htmlFor="opponentId" className="text-white/70 text-sm">Opponent ID (Optional)</Label>
+                <Label htmlFor="opponentId" className="text-white/70 text-sm">Opponent ID {!isChallengeMode && "(Optional)"}</Label>
                 <Input
                   id="opponentId"
                   placeholder="T12345"
@@ -340,7 +358,9 @@ const BattleSetupPage = () => {
           <DialogHeader>
             <DialogTitle className="text-white text-center">Battle Link Code</DialogTitle>
             <DialogDescription className="text-white/70 text-center">
-              Share this code with your opponent to connect
+              {isChallengeMode 
+                ? "Share this code with your opponent after they accept your request" 
+                : "Share this code with your opponent to connect"}
             </DialogDescription>
           </DialogHeader>
           
