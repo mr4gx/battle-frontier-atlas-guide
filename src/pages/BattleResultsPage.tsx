@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Trophy, X, Check, Camera, Upload, RefreshCw } from "lucide-react";
@@ -25,12 +26,18 @@ const BattleResultsPage = () => {
   const [showBadgeAnimation, setShowBadgeAnimation] = useState(false);
   const [battleResult, setBattleResult] = useState<"win" | "loss" | "pending">("pending");
   const [verificationImage, setVerificationImage] = useState<string | null>(null);
+  const [tokensAdded, setTokensAdded] = useState(false); // Track if tokens have been added
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const battle = location.state?.battle as Battle;
   
+  useEffect(() => {
+    if (!battle) {
+      navigate("/dashboard");
+    }
+  }, [battle, navigate]);
+  
   if (!battle) {
-    navigate("/dashboard");
     return null;
   }
   
@@ -52,7 +59,7 @@ const BattleResultsPage = () => {
         unlockNavigation();
       }
     };
-  }, [lockNavigation, saveComplete]);
+  }, [lockNavigation, saveComplete, unlockNavigation]);
   
   useEffect(() => {
     if (battle.result && battle.result !== "pending") {
@@ -76,11 +83,13 @@ const BattleResultsPage = () => {
     }
   }, [battle.result, shouldEarnBadge]);
   
+  // Modify this effect to check if tokens have already been added
   useEffect(() => {
-    if (showTokenAnimation && battleResult === "win") {
+    if (showTokenAnimation && battleResult === "win" && !tokensAdded) {
       addTokens(battle.tokensWagered * 2);
+      setTokensAdded(true); // Mark tokens as added to prevent multiple additions
     }
-  }, [showTokenAnimation, battleResult, battle.tokensWagered, addTokens]);
+  }, [showTokenAnimation, battleResult, battle.tokensWagered, addTokens, tokensAdded]);
   
   useEffect(() => {
     if (showBadgeAnimation && shouldEarnBadge && badge) {
@@ -92,10 +101,17 @@ const BattleResultsPage = () => {
   }, [showBadgeAnimation, shouldEarnBadge, badge, updateBadge]);
   
   const handleResultSelection = (result: "win" | "loss") => {
+    // If result is the same as current, do nothing to prevent re-triggers
+    if (result === battleResult) return;
+    
     setBattleResult(result);
     
     if (result === "loss") {
-      subtractTokens(battle.tokensWagered);
+      // For losses, we only subtract tokens once
+      if (!tokensAdded) {
+        subtractTokens(battle.tokensWagered);
+        setTokensAdded(true);
+      }
     }
     
     setTimeout(() => {

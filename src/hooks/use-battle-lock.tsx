@@ -14,6 +14,7 @@ const BattleLockContext = createContext<BattleLockContextType | undefined>(undef
 export function BattleLockProvider({ children }: { children: ReactNode }) {
   const [isLocked, setIsLocked] = useState(false);
   const [activeBattleRoute, setActiveBattleRoute] = useState<string | null>(null);
+  const [redirectInProgress, setRedirectInProgress] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -34,17 +35,22 @@ export function BattleLockProvider({ children }: { children: ReactNode }) {
     setActiveBattleRoute(null);
     
     // If we're still on the battle results page when unlocking, redirect to dashboard
-    if (location.pathname === '/battle/results') {
-      navigate('/dashboard');
+    if (location.pathname === '/battle/results' && !redirectInProgress) {
+      setRedirectInProgress(true);
+      // Use setTimeout to ensure state updates complete before navigation
+      setTimeout(() => {
+        navigate('/dashboard');
+        setRedirectInProgress(false);
+      }, 0);
     }
   };
 
   // If navigation is locked and we try to navigate away, prevent it
   useEffect(() => {
-    if (isLocked && activeBattleRoute && location.pathname !== activeBattleRoute) {
+    if (isLocked && activeBattleRoute && location.pathname !== activeBattleRoute && !redirectInProgress) {
       navigate(activeBattleRoute);
     }
-  }, [location.pathname, isLocked, activeBattleRoute, navigate]);
+  }, [location.pathname, isLocked, activeBattleRoute, navigate, redirectInProgress]);
 
   return (
     <BattleLockContext.Provider value={{ 
