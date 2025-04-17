@@ -8,10 +8,13 @@ import { cn } from "@/lib/utils";
 import { useTrainer } from "@/context/trainer-context";
 import { toast } from "@/components/ui/sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DiscordNotificationCard } from "@/components/discord-notification-card";
+import { useDiscord } from "@/hooks/use-discord";
 
 const NotificationsPage = () => {
   const { battleRequests, acceptBattleRequest, cancelBattleRequest } = useTrainer();
   const [notifications, setNotifications] = useState(mockNotifications);
+  const { isLoading: isDiscordLoading, isConnected: isDiscordConnected } = useDiscord();
   const navigate = useNavigate();
   
   const getIcon = (type: string) => {
@@ -141,24 +144,19 @@ const NotificationsPage = () => {
     toast.info("Battle request rejected");
   };
   
-  // Sort notifications by date (newest first) and read status (unread first)
   const sortedNotifications = [...notifications].sort((a, b) => {
-    // Sort by read status first
     if (a.read !== b.read) {
       return a.read ? 1 : -1;
     }
-    // Then by date
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
-  // Get open battle requests
   const openBattleRequests = battleRequests.filter(
     request => request.status === "open"
   );
   
   return (
     <div className="min-h-screen pb-20">
-      {/* Header */}
       <header className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -180,7 +178,12 @@ const NotificationsPage = () => {
       </header>
 
       <main className="p-4">
-        {/* Battle Requests Section */}
+        {!isDiscordLoading && !isDiscordConnected && (
+          <div className="mb-6">
+            <DiscordNotificationCard />
+          </div>
+        )}
+        
         {openBattleRequests.length > 0 && (
           <div className="mb-6">
             <h2 className="text-lg font-semibold mb-3 flex items-center">
@@ -255,7 +258,6 @@ const NotificationsPage = () => {
           </div>
         )}
         
-        {/* Other Notifications */}
         <h2 className="text-lg font-semibold mb-3 flex items-center">
           <Bell className="h-5 w-5 mr-2 text-gray-700" />
           Notifications

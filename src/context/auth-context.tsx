@@ -6,9 +6,10 @@ import {
   useState, 
   useEffect 
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { mockTrainer } from "@/data/mock-data";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface User {
   id: string;
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check for saved user in local storage (mock authentication)
@@ -42,6 +44,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     setIsLoading(false);
   }, []);
+
+  // Check for Discord connection success/error
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const discordConnected = queryParams.get('discord_connected');
+    const discordError = queryParams.get('error');
+
+    if (discordConnected === 'true') {
+      toast.success('Discord account connected successfully!', {
+        description: 'You can now receive notifications through Discord.',
+      });
+      
+      // Clean up URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+
+    if (discordError) {
+      let errorMessage = 'Failed to connect Discord account.';
+      
+      // Provide more specific error messages based on error type
+      if (discordError === 'token_exchange_failed') {
+        errorMessage = 'Failed to authenticate with Discord. Please try again.';
+      } else if (discordError === 'user_fetch_failed') {
+        errorMessage = 'Failed to fetch Discord user data. Please try again.';
+      } else if (discordError === 'db_error') {
+        errorMessage = 'Failed to save Discord connection. Please try again.';
+      }
+      
+      toast.error('Discord Connection Failed', {
+        description: errorMessage,
+      });
+      
+      // Clean up URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, [location.search]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);

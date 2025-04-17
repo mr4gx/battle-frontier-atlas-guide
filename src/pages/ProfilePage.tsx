@@ -9,6 +9,7 @@ import { mockFacilities } from "@/data/mock-data";
 import { useTrainer } from "@/context/trainer-context";
 import { TokenDisplay } from "@/components/token-display";
 import { PokemonSprite } from "@/components/pokemon-sprite";
+import { DiscordSettings } from "@/components/discord-settings";
 
 const ProfilePage = () => {
   const { trainer, updateTrainer } = useTrainer();

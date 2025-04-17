@@ -9,7 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      discord_connections: {
+        Row: {
+          created_at: string
+          discord_access_token: string
+          discord_avatar: string | null
+          discord_id: string
+          discord_refresh_token: string
+          discord_username: string
+          id: string
+          token_expires_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discord_access_token: string
+          discord_avatar?: string | null
+          discord_id: string
+          discord_refresh_token: string
+          discord_username: string
+          id?: string
+          token_expires_at: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discord_access_token?: string
+          discord_avatar?: string | null
+          discord_id?: string
+          discord_refresh_token?: string
+          discord_username?: string
+          id?: string
+          token_expires_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      discord_notifications: {
+        Row: {
+          badge_unlocks: boolean
+          battle_challenges: boolean
+          battle_results: boolean
+          created_at: string
+          id: string
+          leaderboard_updates: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_unlocks?: boolean
+          battle_challenges?: boolean
+          battle_results?: boolean
+          created_at?: string
+          id?: string
+          leaderboard_updates?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_unlocks?: boolean
+          battle_challenges?: boolean
+          battle_results?: boolean
+          created_at?: string
+          id?: string
+          leaderboard_updates?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
