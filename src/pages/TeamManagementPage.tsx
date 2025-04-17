@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Plus, X, Save, Search } from "lucide-react";
+import { ChevronLeft, Plus, X, Save, Search, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BottomNavigation } from "@/components/bottom-navigation";
@@ -9,6 +9,9 @@ import { PokemonSprite } from "@/components/pokemon-sprite";
 import { useTrainer } from "@/context/trainer-context";
 import { Pokemon } from "@/types";
 import { cn } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import { Slider } from "@/components/ui/slider";
 
 const TeamManagementPage = () => {
   const { trainer, updateTeam } = useTrainer();
@@ -18,6 +21,7 @@ const TeamManagementPage = () => {
   const [showPokemonSearch, setShowPokemonSearch] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [pokemonResults, setPokemonResults] = useState<Pokemon[]>([]);
+  const [editingLevel, setEditingLevel] = useState<number | null>(null);
   
   useEffect(() => {
     if (trainer) {
@@ -34,6 +38,7 @@ const TeamManagementPage = () => {
   const handleSave = () => {
     updateTeam(team);
     setIsEditing(false);
+    setEditingLevel(null);
   };
   
   const handleAddPokemon = (slot: number) => {
@@ -64,6 +69,23 @@ const TeamManagementPage = () => {
     setShowPokemonSearch(false);
     setSelectedSlot(null);
     setSearchTerm("");
+  };
+
+  const handleEditLevel = (index: number) => {
+    setEditingLevel(index);
+  };
+
+  const handleLevelChange = (index: number, newLevel: number) => {
+    if (newLevel < 1) newLevel = 1;
+    if (newLevel > 100) newLevel = 100;
+
+    const updatedTeam = [...team];
+    updatedTeam[index] = { ...updatedTeam[index], level: newLevel };
+    setTeam(updatedTeam);
+  };
+
+  const handleLevelInputBlur = () => {
+    setEditingLevel(null);
   };
   
   // Mock function to simulate searching for Pokémon
@@ -183,8 +205,34 @@ const TeamManagementPage = () => {
                   </div>
                   
                   {pokemon.id > 0 && (
-                    <div className="text-sm text-gray-500 mt-1">
-                      Lv. {pokemon.level}
+                    <div className="flex items-center text-sm text-gray-500 mt-1">
+                      {editingLevel === index ? (
+                        <div className="flex items-center space-x-2 w-full">
+                          <Input 
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={pokemon.level}
+                            onChange={(e) => handleLevelChange(index, parseInt(e.target.value) || 1)}
+                            onBlur={handleLevelInputBlur}
+                            className="h-7 w-16 px-2 py-1 text-sm"
+                            autoFocus
+                          />
+                          <span className="text-xs text-gray-400">/ 100</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span>Lv. {pokemon.level}</span>
+                          {isEditing && (
+                            <button
+                              onClick={() => handleEditLevel(index)}
+                              className="ml-2 text-gray-400 hover:text-atl-primary-purple"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -219,6 +267,10 @@ const TeamManagementPage = () => {
             <li className="flex items-start">
               <span className="text-atl-primary-purple mr-2">•</span>
               <span>Some facilities have special team requirements</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-atl-primary-purple mr-2">•</span>
+              <span>Pokémon can be between Level 1-100 for casual battles</span>
             </li>
           </ul>
         </div>
