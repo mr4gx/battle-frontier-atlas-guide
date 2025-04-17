@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple text-white flex items-center justify-center">
+    <div className="atl-gradient-bg min-h-screen flex items-center justify-center">
       <div className="text-center px-6 max-w-md">
         <Logo variant="full" size="lg" className="mx-auto mb-8" />
         

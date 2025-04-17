@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/logo";
@@ -30,7 +29,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="atl-gradient-bg min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="flex justify-center mb-8">
@@ -116,7 +115,7 @@ const LoginPage = () => {
         </div>
       </div>
       
-      <div className="py-4 text-center text-xs text-gray-500">
+      <div className="py-4 text-center text-xs text-white/60">
         <p>Atlanta Battle Frontier © 2025</p>
       </div>
     </div>
