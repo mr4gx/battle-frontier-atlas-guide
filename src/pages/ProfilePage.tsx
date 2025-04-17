@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, User, Edit, CheckCheck, Award } from "lucide-react";
@@ -164,7 +163,7 @@ const ProfilePage = () => {
           </div>
           
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
-            <div className="grid grid-cols-4 gap-4"> {/* Changed from grid-cols-5 to grid-cols-4 */}
+            <div className="grid grid-cols-3 gap-4">
               {trainer.badges.map((badge) => {
                 const facility = mockFacilities.find(f => f.id === badge.facilityId);
                 
