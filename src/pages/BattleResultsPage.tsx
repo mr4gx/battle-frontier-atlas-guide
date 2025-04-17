@@ -25,6 +25,7 @@ const BattleResultsPage = () => {
   const [verificationImage, setVerificationImage] = useState<string | null>(null);
   const [tokensAdded, setTokensAdded] = useState(false); // Track if tokens have been added
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const BattleResultsPage = () => {
     return null;
   }
   
-  const facility = battle.facilityId 
+  const facility = battle?.facilityId 
     ? mockFacilities.find(f => f.id === battle.facilityId) 
     : null;
     
@@ -124,6 +125,12 @@ const BattleResultsPage = () => {
   const handleCaptureImage = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+  
+  const handleTakePhoto = () => {
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
     }
   };
   
@@ -381,19 +388,36 @@ const BattleResultsPage = () => {
               <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-white/20 rounded-md">
                 <Camera className="h-12 w-12 text-white/50 mb-2" />
                 <p className="text-sm text-white/80 mb-4">Upload a screenshot of your battle result</p>
-                <Button
-                  variant="outline"
-                  onClick={handleCaptureImage}
-                  className="border-white/20 text-white"
-                >
-                  <Upload className="h-4 w-4 mr-2" /> Upload Screenshot
-                </Button>
+                <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={handleTakePhoto}
+                    className="border-white/20 text-white"
+                  >
+                    <Camera className="h-4 w-4 mr-2" /> Take Photo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCaptureImage}
+                    className="border-white/20 text-white"
+                  >
+                    <Upload className="h-4 w-4 mr-2" /> Upload Image
+                  </Button>
+                </div>
                 <input 
                   type="file" 
                   ref={fileInputRef}
                   onChange={handleImageChange}
                   accept="image/*"
                   className="hidden" 
+                />
+                <input
+                  type="file"
+                  ref={cameraInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
                 />
               </div>
             )}
