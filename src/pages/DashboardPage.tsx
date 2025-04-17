@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, ChevronRight, Award, ExternalLink, Sword, Scan } from "lucide-react";
+import { Bell, ChevronRight, Award, ExternalLink, Sword, Scan, QrCode } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { TokenDisplay } from "@/components/token-display";
 import { Progress } from "@/components/ui/progress";
@@ -12,12 +12,15 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ReturnToBattleButton } from "@/components/return-to-battle-button";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 
 const MAX_TOKENS_TO_QUALIFY = 25;
 
 const DashboardPage = () => {
   const { trainer, isLoading } = useTrainer();
   const [progress, setProgress] = useState(0);
+  const [showQRCode, setShowQRCode] = useState(false);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -40,6 +43,10 @@ const DashboardPage = () => {
       } 
     });
   };
+  
+  const handleBattleMe = () => {
+    setShowQRCode(true);
+  };
 
   if (isLoading || !trainer) {
     return (
@@ -55,6 +62,15 @@ const DashboardPage = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">Dashboard</h1>
           <div className="flex items-center space-x-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleBattleMe}
+              className="border-white/20 text-white hover:bg-white/20 hover:text-white flex items-center gap-1"
+            >
+              <QrCode className="h-4 w-4" />
+              <span className="hidden sm:inline">Battle Me</span>
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -190,9 +206,62 @@ const DashboardPage = () => {
       </main>
 
       <BottomNavigation />
+      
+      {/* QR Code Dialog */}
+      <Dialog open={showQRCode} onOpenChange={setShowQRCode}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-center">Battle Challenge QR Code</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center py-4">
+            <div className="w-64 h-64 border border-gray-200 rounded-lg mb-4 flex items-center justify-center bg-white">
+              <MockQRCode trainerId={trainer.id} name={trainer.name} />
+            </div>
+            
+            <div className="text-center text-sm text-gray-600 max-w-xs">
+              <p>Other trainers can scan this QR code to challenge you to a battle</p>
+            </div>
+            
+            <div className="mt-4">
+              <Button 
+                onClick={() => {
+                  toast.success("QR Code copied to clipboard");
+                  setShowQRCode(false);
+                }}
+                className="bg-atl-primary-purple hover:bg-atl-secondary-purple"
+              >
+                Copy QR Code
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// Simplified QR code mockup
+const MockQRCode = ({ trainerId, name }: { trainerId: string; name: string }) => {
+  return (
+    <div className="w-48 h-48 bg-white relative flex items-center justify-center">
+      <div className="w-40 h-40 border-2 border-black">
+        <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-black"></div>
+        <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-black"></div>
+        <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-black"></div>
+        <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-black"></div>
+        
+        <div className="w-full h-full flex flex-col items-center justify-center">
+          <div className="w-20 h-20 bg-black m-2 flex items-center justify-center">
+            <div className="w-14 h-14 bg-white flex items-center justify-center">
+              <div className="w-8 h-8 bg-black"></div>
+            </div>
+          </div>
+          <span className="text-xs font-mono mt-1">{trainerId}</span>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default DashboardPage;
-
