@@ -92,7 +92,11 @@
 
 @layer components {
   .atl-gradient-bg {
-    @apply bg-gradient-to-br from-atl-primary-purple to-atl-bright-blue;
+    @apply bg-gradient-to-br from-atl-dark-purple to-atl-secondary-purple;
+  }
+  
+  .atl-glass-card {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-lg shadow-lg text-white;
   }
   
   .atl-card {

@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Map, Trophy, User, QrCode } from "lucide-react";
+import { Home, Map, Trophy, User, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomNavigation() {
@@ -18,14 +18,14 @@ export function BottomNavigation() {
       href: "/facilities",
     },
     {
-      label: "QR Scanner",
-      icon: QrCode,
-      href: "/scanner",
+      label: "Bulletin",
+      icon: FileText,
+      href: "/bulletin",
     },
     {
-      label: "Brackets",
+      label: "Leaderboard",
       icon: Trophy,
-      href: "/brackets",
+      href: "/leaderboard",
     },
     {
       label: "Profile",

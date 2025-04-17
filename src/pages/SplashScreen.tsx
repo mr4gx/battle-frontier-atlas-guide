@@ -17,7 +17,7 @@ const SplashScreen = () => {
 
     const timer = setTimeout(() => {
       // Redirect to dashboard if authenticated, otherwise to login
-      navigate(isAuthenticated ? "/dashboard" : "/login");
+      navigate(isAuthenticated ? "/dashboard" : "/");
     }, 3000);
 
     return () => {

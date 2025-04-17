@@ -19,12 +19,13 @@ import FacilityDetailPage from "@/pages/FacilityDetailPage";
 import BattleSetupPage from "@/pages/BattleSetupPage";
 import BattleResultsPage from "@/pages/BattleResultsPage";
 import QRScannerPage from "@/pages/QRScannerPage";
-import BracketPage from "@/pages/BracketPage";
+import LeaderboardPage from "@/pages/LeaderboardPage";
 import TeamManagementPage from "@/pages/TeamManagementPage";
 import BattleHistoryPage from "@/pages/BattleHistoryPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import BattleBulletinPage from "@/pages/BattleBulletinPage";
 import NotFound from "@/pages/NotFound";
+import Index from "@/pages/Index";
 
 // Protected Route component
 import ProtectedRoute from "@/components/protected-route";
@@ -41,7 +42,8 @@ const App = () => (
             <Sonner />
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<SplashScreen />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/splash" element={<SplashScreen />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
@@ -55,7 +57,7 @@ const App = () => (
                 <Route path="/battle/setup" element={<BattleSetupPage />} />
                 <Route path="/battle/results" element={<BattleResultsPage />} />
                 <Route path="/scanner" element={<QRScannerPage />} />
-                <Route path="/brackets" element={<BracketPage />} />
+                <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/team" element={<TeamManagementPage />} />
                 <Route path="/battles" element={<BattleHistoryPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
