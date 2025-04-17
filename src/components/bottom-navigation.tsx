@@ -13,9 +13,9 @@ export function BottomNavigation() {
       href: "/dashboard",
     },
     {
-      label: "Battle Areas", // Changed from Facilities
-      icon: MapPin, // Changed from Map
-      href: "/battle-areas", // Changed from facilities
+      label: "Battle Areas",
+      icon: MapPin,
+      href: "/battle-areas",
     },
     {
       label: "Bulletin",
@@ -47,20 +47,20 @@ export function BottomNavigation() {
             className={cn(
               "flex flex-col items-center justify-center py-3 px-2 w-full",
               isActive 
-                ? "text-white" 
-                : "text-white/60 hover:text-white/80 transition-colors"
+                ? "text-gray-800" 
+                : "text-gray-500 hover:text-gray-700 transition-colors"
             )}
           >
             <item.icon 
               size={24} 
               className={cn(
-                isActive ? "text-white" : "text-white/60",
+                isActive ? "text-gray-800" : "text-gray-500",
                 "mb-1"
               )} 
             />
             <span className={cn(
               "text-xs font-medium",
-              isActive ? "text-white" : "text-white/60"
+              isActive ? "text-gray-800" : "text-gray-500"
             )}>
               {item.label}
             </span>
