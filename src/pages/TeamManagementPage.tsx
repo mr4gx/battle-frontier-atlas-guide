@@ -8,19 +8,23 @@ import { PokemonSprite } from "@/components/pokemon-sprite";
 import { useTrainer } from "@/context/trainer-context";
 import { Pokemon } from "@/types";
 import { cn } from "@/lib/utils";
-import { useForm } from "react-hook-form";
-import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
-import { Slider } from "@/components/ui/slider";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { usePokemonSearch } from "@/hooks/usePokemonSearch";
 
 const TeamManagementPage = () => {
   const { trainer, updateTeam } = useTrainer();
   const [team, setTeam] = useState<Pokemon[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [showPokemonSearch, setShowPokemonSearch] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
-  const [pokemonResults, setPokemonResults] = useState<Pokemon[]>([]);
   const [editingLevel, setEditingLevel] = useState<number | null>(null);
+  
+  const { 
+    searchTerm, 
+    setSearchTerm, 
+    results: pokemonResults, 
+    isLoading: isSearchLoading 
+  } = usePokemonSearch();
   
   useEffect(() => {
     if (trainer) {
@@ -43,8 +47,7 @@ const TeamManagementPage = () => {
   const handleAddPokemon = (slot: number) => {
     setSelectedSlot(slot);
     setShowPokemonSearch(true);
-    // Generate mock search results
-    generateMockSearchResults("");
+    setSearchTerm("");
   };
   
   const handleRemovePokemon = (index: number) => {
@@ -87,40 +90,9 @@ const TeamManagementPage = () => {
     setEditingLevel(null);
   };
   
-  // Mock function to simulate searching for Pokémon
-  const generateMockSearchResults = (term: string) => {
-    // Popular Pokémon to include in results
-    const popularPokemon = [
-      { id: 25, name: "Pikachu", moves: ["Thunderbolt", "Quick Attack", "Iron Tail", "Volt Tackle"], level: 50 },
-      { id: 6, name: "Charizard", moves: ["Flamethrower", "Dragon Claw", "Air Slash", "Blast Burn"], level: 50 },
-      { id: 9, name: "Blastoise", moves: ["Hydro Pump", "Ice Beam", "Flash Cannon", "Skull Bash"], level: 50 },
-      { id: 3, name: "Venusaur", moves: ["Solar Beam", "Sludge Bomb", "Earth Power", "Sleep Powder"], level: 50 },
-      { id: 149, name: "Dragonite", moves: ["Dragon Dance", "Outrage", "Hurricane", "Extreme Speed"], level: 50 },
-      { id: 150, name: "Mewtwo", moves: ["Psystrike", "Aura Sphere", "Ice Beam", "Fire Blast"], level: 50 },
-      { id: 94, name: "Gengar", moves: ["Shadow Ball", "Sludge Wave", "Focus Blast", "Thunderbolt"], level: 50 },
-      { id: 59, name: "Arcanine", moves: ["Flare Blitz", "Wild Charge", "Extreme Speed", "Crunch"], level: 50 },
-      { id: 130, name: "Gyarados", moves: ["Waterfall", "Bounce", "Earthquake", "Ice Fang"], level: 50 },
-      { id: 143, name: "Snorlax", moves: ["Body Slam", "Earthquake", "Rest", "Sleep Talk"], level: 50 },
-      { id: 65, name: "Alakazam", moves: ["Psychic", "Shadow Ball", "Focus Blast", "Energy Ball"], level: 50 },
-      { id: 448, name: "Lucario", moves: ["Aura Sphere", "Close Combat", "Meteor Mash", "Extreme Speed"], level: 50 },
-    ];
-    
-    const lowerTerm = term.toLowerCase();
-    let results = [...popularPokemon];
-    
-    if (lowerTerm) {
-      results = popularPokemon.filter(pokemon => 
-        pokemon.name.toLowerCase().includes(lowerTerm)
-      );
-    }
-    
-    setPokemonResults(results);
-  };
-  
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
-    generateMockSearchResults(term);
   };
   
   return (
@@ -301,29 +273,43 @@ const TeamManagementPage = () => {
             </div>
             
             <div className="overflow-y-auto flex-1 p-4">
-              <div className="grid grid-cols-2 gap-3">
-                {pokemonResults.map((pokemon) => (
-                  <div 
-                    key={pokemon.id}
-                    className={cn(
-                      "border rounded-lg p-2 flex items-center cursor-pointer hover:bg-gray-50",
-                      team.some(p => p.id === pokemon.id) && "border-atl-primary-purple bg-atl-soft-blue/30"
-                    )}
-                    onClick={() => handleSelectPokemon(pokemon)}
-                  >
-                    <PokemonSprite 
-                      id={pokemon.id} 
-                      name={pokemon.name}
-                      size="sm"
-                      className="mr-2"
-                    />
-                    <div>
-                      <div className="font-medium text-sm">{pokemon.name}</div>
-                      <div className="text-xs text-gray-500">Lv. {pokemon.level}</div>
+              {isSearchLoading ? (
+                <div className="flex justify-center items-center py-8">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : pokemonResults.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {pokemonResults.map((pokemon) => (
+                    <div 
+                      key={pokemon.id}
+                      className={cn(
+                        "border rounded-lg p-2 flex items-center cursor-pointer hover:bg-gray-50",
+                        team.some(p => p.id === pokemon.id) && "border-atl-primary-purple bg-atl-soft-blue/30"
+                      )}
+                      onClick={() => handleSelectPokemon(pokemon)}
+                    >
+                      <PokemonSprite 
+                        id={pokemon.id} 
+                        name={pokemon.name}
+                        size="sm"
+                        className="mr-2"
+                      />
+                      <div>
+                        <div className="font-medium text-sm">{pokemon.name}</div>
+                        <div className="text-xs text-gray-500">Lv. {pokemon.level}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : searchTerm ? (
+                <div className="text-center py-8 text-gray-500">
+                  No Pokémon found matching "{searchTerm}"
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Start typing to search for Pokémon
+                </div>
+              )}
             </div>
           </div>
         </div>
