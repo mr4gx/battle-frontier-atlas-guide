@@ -69,7 +69,8 @@ export const mockBattles: Battle[] = [
     result: "win",
     tokensWagered: 5,
     date: "2025-04-12T14:30:00",
-    notes: "Close battle, won with final Pokémon"
+    notes: "Close battle, won with final Pokémon",
+    status: "completed"
   },
   {
     id: "btl2",
@@ -78,7 +79,8 @@ export const mockBattles: Battle[] = [
     facilityId: "f1",
     result: "win",
     tokensWagered: 8,
-    date: "2025-04-12T16:45:00"
+    date: "2025-04-12T16:45:00",
+    status: "completed"
   },
   {
     id: "btl3",
@@ -88,7 +90,8 @@ export const mockBattles: Battle[] = [
     result: "loss",
     tokensWagered: 10,
     date: "2025-04-13T10:15:00",
-    notes: "Need to improve against Rock types"
+    notes: "Need to improve against Rock types",
+    status: "completed"
   },
   {
     id: "btl4",
@@ -97,7 +100,8 @@ export const mockBattles: Battle[] = [
     facilityId: "f2",
     result: "win",
     tokensWagered: 12,
-    date: "2025-04-13T13:20:00"
+    date: "2025-04-13T13:20:00",
+    status: "completed"
   },
   {
     id: "btl5",
@@ -107,7 +111,8 @@ export const mockBattles: Battle[] = [
     result: "win",
     tokensWagered: 15,
     date: "2025-04-14T09:45:00",
-    notes: "Championship-level battle"
+    notes: "Championship-level battle",
+    status: "completed"
   }
 ];
 
