@@ -9,6 +9,9 @@ import { Trainer, Badge, Pokemon, Battle, BattleRequest } from "@/types";
 import { mockTrainer, mockBattles } from "@/data/mock-data";
 import { useAuth } from "./auth-context";
 import { toast } from "@/components/ui/sonner";
+import { Award } from "lucide-react";
+import { BadgeAchievementToast } from "@/components/ui/badge-achievement-toast";
+import { mockFacilities } from "@/data/mock-data";
 
 const mockTrainers: Trainer[] = [
   mockTrainer,
@@ -129,6 +132,8 @@ interface TrainerContextType {
   startBattle: (battleId: string) => void;
   getReadyBattles: () => Battle[];
   getActiveBattles: () => Battle[];
+  checkBadgeAchievements: (facilityId: string) => void;
+  getBattlesByFacility: (facilityId: string) => Battle[];
 }
 
 const TrainerContext = createContext<TrainerContextType | undefined>(undefined);
@@ -232,6 +237,10 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     
     if (battle.result === "win") {
       updateTrainer({ wins: (trainer?.wins || 0) + 1 });
+      if (battle.facilityId && battle.status === "completed") {
+        // Check for badge achievement when a battle is won and completed
+        checkBadgeAchievements(battle.facilityId);
+      }
     } else if (battle.result === "loss") {
       updateTrainer({ losses: (trainer?.losses || 0) + 1 });
     }
@@ -242,6 +251,46 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
   const getBattleHistory = () => {
     return battles.filter(battle => battle.status === "completed")
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  };
+
+  const getBattlesByFacility = (facilityId: string) => {
+    return battles.filter(battle => 
+      battle.facilityId === facilityId && 
+      battle.status === "completed" && 
+      battle.result === "win"
+    );
+  };
+
+  const checkBadgeAchievements = (facilityId: string) => {
+    if (!trainer) return;
+
+    // Get the facility-specific badge
+    const badge = trainer.badges.find(b => b.facilityId === facilityId);
+    if (!badge || badge.obtained) return; // Skip if badge doesn't exist or is already obtained
+
+    // Count completed wins for this facility
+    const facilityWins = getBattlesByFacility(facilityId).length;
+    
+    // Find the facility name for better user experience
+    const facility = mockFacilities.find(f => f.id === facilityId);
+    const facilityName = facility ? facility.name : "Unknown Area";
+    
+    // Check if trainer has won at least 7 battles in this facility
+    if (facilityWins >= 7) {
+      // Update the badge to obtained
+      updateBadge(badge.id, { 
+        obtained: true, 
+        dateObtained: new Date().toISOString() 
+      });
+      
+      // Show achievement notification
+      toast.custom(() => (
+        <BadgeAchievementToast badgeName={facilityName} />
+      ), {
+        duration: 6000,
+        position: "top-center",
+      });
+    }
   };
 
   const createBattleRequest = (request: Omit<BattleRequest, "id" | "createdAt" | "trainerId" | "trainerName" | "trainerAvatar" | "trainerClass" | "status">) => {
@@ -383,7 +432,9 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
         getAllTrainers,
         startBattle,
         getReadyBattles,
-        getActiveBattles
+        getActiveBattles,
+        checkBadgeAchievements,
+        getBattlesByFacility
       }}
     >
       {children}

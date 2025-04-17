@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Trophy, X, Check, Camera, Upload, RefreshCw } from "lucide-react";
@@ -16,9 +15,7 @@ import { toast } from "@/components/ui/sonner";
 import { useBattleLock } from "@/hooks/use-battle-lock";
 
 const BattleResultsPage = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { trainer, addTokens, updateBadge, subtractTokens, addBattle } = useTrainer();
+  const { trainer, addTokens, updateBadge, subtractTokens, addBattle, checkBadgeAchievements } = useTrainer();
   const { lockNavigation, unlockNavigation } = useBattleLock();
   const [notes, setNotes] = useState("");
   const [saveComplete, setSaveComplete] = useState(false);
@@ -29,6 +26,8 @@ const BattleResultsPage = () => {
   const [tokensAdded, setTokensAdded] = useState(false); // Track if tokens have been added
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  const location = useLocation();
+  const navigate = useNavigate();
   const battle = location.state?.battle as Battle;
   
   useEffect(() => {
@@ -83,7 +82,6 @@ const BattleResultsPage = () => {
     }
   }, [battle.result, shouldEarnBadge]);
   
-  // Modify this effect to check if tokens have already been added
   useEffect(() => {
     if (showTokenAnimation && battleResult === "win" && !tokensAdded) {
       addTokens(battle.tokensWagered * 2);
@@ -101,13 +99,11 @@ const BattleResultsPage = () => {
   }, [showBadgeAnimation, shouldEarnBadge, badge, updateBadge]);
   
   const handleResultSelection = (result: "win" | "loss") => {
-    // If result is the same as current, do nothing to prevent re-triggers
     if (result === battleResult) return;
     
     setBattleResult(result);
     
     if (result === "loss") {
-      // For losses, we only subtract tokens once
       if (!tokensAdded) {
         subtractTokens(battle.tokensWagered);
         setTokensAdded(true);
@@ -153,8 +149,7 @@ const BattleResultsPage = () => {
       return;
     }
     
-    // Add the battle with the completed status
-    addBattle({
+    const savedBattle = addBattle({
       opponentId: battle.opponentId,
       opponentName: battle.opponentName,
       facilityId: battle.facilityId,
@@ -162,8 +157,12 @@ const BattleResultsPage = () => {
       tokensWagered: battle.tokensWagered,
       notes: notes || `${battleResult === "win" ? "Victory" : "Defeat"} against ${battle.opponentName}`,
       verificationImage: verificationImage,
-      status: "completed" // Set status as completed when saving result
+      status: "completed"
     });
+    
+    if (battleResult === "win" && battle.facilityId) {
+      checkBadgeAchievements(battle.facilityId);
+    }
     
     toast.success("Battle result saved successfully!");
     setSaveComplete(true);
