@@ -1,3 +1,4 @@
+
 import { 
   ReactNode, 
   createContext, 
@@ -188,12 +189,15 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       ...trainer,
       tokens: trainer.tokens + amount
     });
+    
+    toast.success(`+${amount} tokens added to your account`);
   };
 
   const subtractTokens = (amount: number) => {
     if (!trainer) return false;
     
     if (trainer.tokens < amount) {
+      toast.error("Not enough tokens");
       return false;
     }
     
@@ -202,6 +206,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       tokens: trainer.tokens - amount
     });
     
+    toast.info(`-${amount} tokens deducted from your account`);
     return true;
   };
 
@@ -277,15 +282,25 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     
     updateBattleRequest(id, { status: "accepted" });
     
-    addBattle({
+    // Generate a random 8-digit link code
+    const linkCode = Math.floor(10000000 + Math.random() * 90000000).toString();
+    
+    // Create the battle with pending result
+    const battle = addBattle({
       opponentId: request.trainerId,
       opponentName: request.trainerName,
       facilityId: request.facilityId,
       tokensWagered: request.tokensWagered,
-      result: "pending"
+      result: "pending",
+      linkCode: linkCode
     });
     
     toast.success(`You accepted a battle with ${request.trainerName}!`);
+    
+    // Subtract the tokens for the wager
+    subtractTokens(request.tokensWagered);
+    
+    return battle;
   };
 
   const cancelBattleRequest = (id: string) => {

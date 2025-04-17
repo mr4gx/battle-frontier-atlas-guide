@@ -35,16 +35,17 @@ export function BottomNavigation() {
   ];
   
   return (
-    <nav className="atl-bottom-nav z-50 bg-white/10 backdrop-blur-md border-t border-white/10">
+    <nav className="atl-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-md border-t border-white/10">
       {navItems.map((item) => {
-        const isActive = location.pathname === item.href;
+        const isActive = location.pathname === item.href || 
+                         (item.href !== "/dashboard" && location.pathname.startsWith(item.href));
         
         return (
           <Link
             key={item.href}
             to={item.href}
             className={cn(
-              "atl-bottom-nav-item",
+              "atl-bottom-nav-item flex flex-col items-center justify-center py-2",
               isActive ? "atl-bottom-nav-item-active" : "atl-bottom-nav-item-inactive"
             )}
           >

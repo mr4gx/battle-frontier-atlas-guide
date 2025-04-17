@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Plus, Minus, QrCode, Scan } from "lucide-react";
+import { ChevronLeft, Plus, Minus, QrCode, Scan, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -12,11 +12,13 @@ import { useTrainer } from "@/context/trainer-context";
 import { PokemonSprite } from "@/components/pokemon-sprite";
 import { mockFacilities } from "@/data/mock-data";
 import { cn } from "@/lib/utils";
+import { toast } from "@/components/ui/sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 const BattleSetupPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { trainer, subtractTokens, addBattle } = useTrainer();
+  const { trainer, subtractTokens, createBattleRequest } = useTrainer();
   
   const facilityId = location.state?.facilityId;
   const facility = facilityId ? mockFacilities.find(f => f.id === facilityId) : null;
@@ -26,6 +28,26 @@ const BattleSetupPage = () => {
   const [battleFormat, setBattleFormat] = useState("single");
   const [tokensWager, setTokensWager] = useState(5);
   const [teamSelected, setTeamSelected] = useState(true);
+  const [showLinkCodeDialog, setShowLinkCodeDialog] = useState(false);
+  const [linkCode, setLinkCode] = useState("");
+  const [linkCodeCopied, setLinkCodeCopied] = useState(false);
+  const [isChallengeMode, setIsChallengeMode] = useState(false);
+  
+  useEffect(() => {
+    // Check if we're in challenge mode (from leaderboard)
+    if (location.state?.challengeMode) {
+      setIsChallengeMode(true);
+      if (location.state.opponentName) setOpponentName(location.state.opponentName);
+      if (location.state.opponentId) setOpponentId(location.state.opponentId);
+      if (location.state.facilityId) {
+        const selectedFacility = mockFacilities.find(f => f.id === location.state.facilityId);
+        if (selectedFacility && selectedFacility.battleStyle) {
+          setBattleFormat(selectedFacility.battleStyle.toLowerCase());
+        }
+      }
+      if (location.state.tokensWagered) setTokensWager(location.state.tokensWagered);
+    }
+  }, [location.state]);
   
   if (!trainer) return null;
   
@@ -41,37 +63,77 @@ const BattleSetupPage = () => {
     }
   };
   
+  const generateLinkCode = () => {
+    // Generate random 8-digit code
+    const code = Math.floor(10000000 + Math.random() * 90000000).toString();
+    setLinkCode(code);
+    setShowLinkCodeDialog(true);
+  };
+  
+  const copyLinkCode = () => {
+    navigator.clipboard.writeText(linkCode);
+    setLinkCodeCopied(true);
+    setTimeout(() => setLinkCodeCopied(false), 2000);
+  };
+  
   const handleBattleStart = () => {
     // Validate form
     if (!opponentName) {
-      alert("Please enter an opponent name");
+      toast.error("Please enter an opponent name");
       return;
     }
     
     // Check if enough tokens
     if (trainer.tokens < tokensWager) {
-      alert("You don't have enough tokens");
+      toast.error("You don't have enough tokens");
       return;
     }
     
+    if (isChallengeMode) {
+      // Create battle request
+      try {
+        createBattleRequest({
+          facilityId: facilityId || "",
+          facilityName: facility?.name || "Unknown Facility",
+          battleStyle: battleFormat,
+          time: new Date().toISOString(),
+          tokensWagered: tokensWager,
+          notes: `Challenge from ${trainer.name}`,
+          opponentId: opponentId
+        });
+        
+        toast.success("Battle request sent! Waiting for opponent to accept.");
+        navigate("/bulletin");
+      } catch (error) {
+        toast.error("Failed to create battle request");
+      }
+    } else {
+      // Generate link code and proceed to battle
+      generateLinkCode();
+    }
+  };
+  
+  const proceedToBattle = () => {
     // Subtract tokens for the wager (will be returned + opponent tokens if win)
     subtractTokens(tokensWager);
     
     // For demo purposes, we'll just create a mock battle with 50/50 win chance
     const result = Math.random() > 0.5 ? "win" : "loss";
     
-    // Create a new battle record
-    const battle = addBattle({
-      opponentId: opponentId || "unknown",
-      opponentName,
-      facilityId,
-      result,
-      tokensWagered: tokensWager,
-      notes: `${battleFormat} battle at ${facility?.name || 'unknown location'}`
-    });
-    
     // Navigate to result page
-    navigate("/battle/results", { state: { battle } });
+    navigate("/battle/results", { 
+      state: { 
+        battle: {
+          opponentId: opponentId || "unknown",
+          opponentName,
+          facilityId,
+          result: "pending",
+          tokensWagered: tokensWager,
+          linkCode: linkCode,
+          notes: `${battleFormat} battle at ${facility?.name || 'unknown location'}`
+        } 
+      }
+    });
   };
   
   const handleScanQR = () => {
@@ -115,11 +177,13 @@ const BattleSetupPage = () => {
                     value={opponentName}
                     onChange={(e) => setOpponentName(e.target.value)}
                     className="rounded-r-none bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    readOnly={isChallengeMode}
                   />
                   <Button
                     variant="outline"
                     className="rounded-l-none border-l-0 border-white/20 text-white"
                     onClick={handleScanQR}
+                    disabled={isChallengeMode}
                   >
                     <Scan className="h-4 w-4 mr-1" />
                     Scan
@@ -135,6 +199,7 @@ const BattleSetupPage = () => {
                   value={opponentId}
                   onChange={(e) => setOpponentId(e.target.value)}
                   className="mt-1 bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  readOnly={isChallengeMode}
                 />
               </div>
             </div>
@@ -145,7 +210,7 @@ const BattleSetupPage = () => {
         <section className="mb-6">
           <h2 className="text-lg font-semibold mb-3">Battle Format</h2>
           <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-            <RadioGroup value={battleFormat} onValueChange={setBattleFormat}>
+            <RadioGroup value={battleFormat} onValueChange={setBattleFormat} disabled={isChallengeMode}>
               <div className="flex items-center space-x-2 mb-3">
                 <RadioGroupItem value="single" id="single" className="border-white text-white" />
                 <Label htmlFor="single" className="text-white">Single Battle (1v1)</Label>
@@ -175,7 +240,7 @@ const BattleSetupPage = () => {
                 variant="outline"
                 size="icon"
                 onClick={handleTokenDecrease}
-                disabled={tokensWager <= 1}
+                disabled={tokensWager <= 1 || isChallengeMode}
                 className="border-white/20 text-white"
               >
                 <Minus className="h-4 w-4" />
@@ -190,7 +255,7 @@ const BattleSetupPage = () => {
                 variant="outline"
                 size="icon"
                 onClick={handleTokenIncrease}
-                disabled={tokensWager >= trainer.tokens}
+                disabled={tokensWager >= trainer.tokens || isChallengeMode}
                 className="border-white/20 text-white"
               >
                 <Plus className="h-4 w-4" />
@@ -232,6 +297,12 @@ const BattleSetupPage = () => {
                   </span>
                 </div>
               ))}
+              
+              {trainer.team.length === 0 && (
+                <div className="col-span-6 text-center py-4 text-white/60">
+                  <p>No Pokémon in your team</p>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -243,12 +314,57 @@ const BattleSetupPage = () => {
             onClick={handleBattleStart}
             disabled={!opponentName || !teamSelected || trainer.tokens < tokensWager}
           >
-            Start Battle
+            {isChallengeMode ? "Send Battle Request" : "Start Battle"}
           </Button>
         </div>
       </main>
 
       <BottomNavigation />
+      
+      {/* Link Code Dialog */}
+      <Dialog open={showLinkCodeDialog} onOpenChange={setShowLinkCodeDialog}>
+        <DialogContent className="bg-atl-dark-purple border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white text-center">Battle Link Code</DialogTitle>
+            <DialogDescription className="text-white/70 text-center">
+              Share this code with your opponent to connect
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="bg-white/10 rounded-lg p-4 mb-4">
+              <p className="text-3xl font-mono text-center tracking-widest">{linkCode}</p>
+            </div>
+            
+            <div className="flex justify-center mb-4">
+              <Button
+                variant="outline"
+                onClick={copyLinkCode}
+                className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+              >
+                {linkCodeCopied ? (
+                  <><Check className="h-4 w-4 mr-2" /> Copied</>
+                ) : (
+                  <><Copy className="h-4 w-4 mr-2" /> Copy Code</>
+                )}
+              </Button>
+            </div>
+            
+            <p className="text-white/70 text-sm text-center mb-4">
+              Both trainers need to enter this code in their Pokémon Switch game
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              onClick={proceedToBattle}
+              className="w-full bg-atl-primary-purple hover:bg-atl-secondary-purple"
+            >
+              Continue to Battle
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
