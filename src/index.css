@@ -7,4 +7,17 @@
   .atl-gradient-bg {
     @apply bg-gradient-to-b from-atl-dark-purple to-atl-secondary-purple min-h-screen text-white;
   }
+  
+  /* Add bottom navigation styling */
+  .atl-bottom-nav {
+    @apply grid grid-cols-5 shadow-lg;
+  }
+  
+  .atl-bottom-nav a {
+    @apply transition-all duration-200;
+  }
+  
+  .atl-bottom-nav a:hover {
+    @apply bg-white/5;
+  }
 }

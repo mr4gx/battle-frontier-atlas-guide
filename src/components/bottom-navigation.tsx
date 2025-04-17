@@ -35,7 +35,7 @@ export function BottomNavigation() {
   ];
   
   return (
-    <nav className="atl-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-md border-t border-white/10">
+    <nav className="atl-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-md border-t border-white/10 flex justify-around">
       {navItems.map((item) => {
         const isActive = location.pathname === item.href || 
                          (item.href !== "/dashboard" && location.pathname.startsWith(item.href));
@@ -45,8 +45,10 @@ export function BottomNavigation() {
             key={item.href}
             to={item.href}
             className={cn(
-              "atl-bottom-nav-item flex flex-col items-center justify-center py-2",
-              isActive ? "atl-bottom-nav-item-active" : "atl-bottom-nav-item-inactive"
+              "flex flex-col items-center justify-center py-3 px-2 w-full",
+              isActive 
+                ? "text-white" 
+                : "text-white/60 hover:text-white/80 transition-colors"
             )}
           >
             <item.icon 
@@ -57,7 +59,7 @@ export function BottomNavigation() {
               )} 
             />
             <span className={cn(
-              "text-xs",
+              "text-xs font-medium",
               isActive ? "text-white" : "text-white/60"
             )}>
               {item.label}

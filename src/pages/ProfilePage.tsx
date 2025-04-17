@@ -38,15 +38,15 @@ const ProfilePage = () => {
   };
   
   return (
-    <div className="min-h-screen pb-20">
+    <div className="atl-gradient-bg min-h-screen pb-24">
       {/* Header */}
-      <header className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white/10 backdrop-blur-md px-4 py-4 border-b border-white/10 sticky top-0 z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <Link to="/dashboard" className="mr-2">
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 text-white" />
             </Link>
-            <h1 className="text-xl font-bold text-atl-dark-purple">Trainer Profile</h1>
+            <h1 className="text-xl font-bold text-white">Trainer Profile</h1>
           </div>
           {isEditing ? (
             <div className="flex gap-2">
@@ -54,12 +54,13 @@ const ProfilePage = () => {
                 variant="ghost" 
                 size="sm"
                 onClick={handleCancel}
+                className="text-white hover:bg-white/10"
               >
                 Cancel
               </Button>
               <Button 
                 size="sm"
-                className="bg-atl-primary-purple hover:bg-atl-secondary-purple"
+                className="bg-white/20 hover:bg-white/30 text-white"
                 onClick={handleSave}
               >
                 Save
@@ -70,6 +71,7 @@ const ProfilePage = () => {
               variant="outline" 
               size="sm"
               onClick={handleStartEdit}
+              className="border-white/20 text-white hover:bg-white/10"
             >
               <Edit className="h-4 w-4 mr-1" />
               Edit
