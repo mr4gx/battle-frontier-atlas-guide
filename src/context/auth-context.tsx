@@ -1,3 +1,4 @@
+
 import { 
   ReactNode, 
   createContext, 
@@ -9,12 +10,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { mockTrainer } from "@/data/mock-data";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+import { User, Session } from "@supabase/supabase-js";
 
 interface RegisterOptions {
   avatarUrl?: string;
@@ -37,19 +33,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Check for saved user in local storage (mock authentication)
-    const savedUser = localStorage.getItem("atlUser");
-    
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    
-    setIsLoading(false);
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+      }
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Check for Discord connection success/error
@@ -114,24 +119,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
-      // This is a mock login - in a real app, we'd call an API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      if (email && password) {
-        const user = {
-          id: mockTrainer.id,
-          email,
-          name: mockTrainer.name
-        };
-        
-        setUser(user);
-        localStorage.setItem("atlUser", JSON.stringify(user));
-        navigate("/dashboard");
-      } else {
-        throw new Error("Invalid credentials");
-      }
-    } catch (error) {
-      console.error("Login failed:", error);
+      if (error) throw error;
+      
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Login failed:", error.message);
       throw error;
     } finally {
       setIsLoading(false);
@@ -142,59 +139,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
-      // This is a mock registration - in a real app, we'd call an API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Register with Supabase and include user metadata
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            avatarUrl: options?.avatarUrl,
+            twitterUrl: options?.twitterUrl,
+            instagramUrl: options?.instagramUrl,
+            youtubeUrl: options?.youtubeUrl,
+            twitchUrl: options?.twitchUrl
+          }
+        }
+      });
       
-      if (email && password && name) {
-        const user = {
-          id: `T${Math.floor(Math.random() * 90000) + 10000}`,
-          email,
-          name
-        };
-        
-        // Store user in local storage
-        setUser(user);
-        localStorage.setItem("atlUser", JSON.stringify(user));
-        
-        // Set initial trainer data with tokens and social links
-        const trainerData = {
-          id: user.id,
-          name: user.name,
-          avatar: options?.avatarUrl || "/assets/trainers/default.png",
-          trainerClass: "Novice",
-          wins: 0,
-          losses: 0,
-          badges: [],
-          tokens: 5,
-          team: [],
-          achievementBadges: [],
-          twitterUrl: options?.twitterUrl || '',
-          instagramUrl: options?.instagramUrl || '',
-          youtubeUrl: options?.youtubeUrl || '',
-          twitchUrl: options?.twitchUrl || ''
-        };
-        
-        localStorage.setItem("atlTrainer", JSON.stringify(trainerData));
-        
-        toast.success(`Welcome, Trainer ${name}!`, {
-          description: `You've received 5 tokens to start your journey.`
-        });
-        
-        navigate("/dashboard");
-      } else {
-        throw new Error("Invalid registration data");
-      }
-    } catch (error) {
-      console.error("Registration failed:", error);
+      if (error) throw error;
+      
+      toast.success(`Welcome, Trainer ${name}!`, {
+        description: `You've received 5 tokens to start your journey.`
+      });
+      
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Registration failed:", error.message);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("atlUser");
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate("/login");
   };
 

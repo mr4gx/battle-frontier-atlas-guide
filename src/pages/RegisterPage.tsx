@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/logo";
@@ -45,8 +46,16 @@ const RegisterPage = () => {
         twitchUrl
       });
       setShowSuccess(true);
-    } catch (err) {
-      setError("Registration failed. Please try again.");
+    } catch (err: any) {
+      if (err.message?.includes("already registered")) {
+        setError("This email is already registered.");
+      } else if (err.message?.includes("Valid email")) {
+        setError("Please enter a valid email address.");
+      } else if (err.message?.includes("at least 6 characters")) {
+        setError("Password must be at least 6 characters.");
+      } else {
+        setError(err.message || "Registration failed. Please try again.");
+      }
       setShowSuccess(false);
     }
   };

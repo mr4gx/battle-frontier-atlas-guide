@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +25,14 @@ const LoginPage = () => {
     try {
       setError("");
       await login(email, password);
-    } catch (err) {
-      setError("Invalid email or password");
+    } catch (err: any) {
+      if (err.message.includes("Invalid login credentials")) {
+        setError("Invalid email or password");
+      } else if (err.message.includes("Email not confirmed")) {
+        setError("Please confirm your email before logging in");
+      } else {
+        setError(err.message || "Failed to login");
+      }
     }
   };
 
