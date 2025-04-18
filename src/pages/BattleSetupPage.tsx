@@ -32,6 +32,7 @@ const BattleSetupPage = () => {
   const [linkCode, setLinkCode] = useState("");
   const [linkCodeCopied, setLinkCodeCopied] = useState(false);
   const [isChallengeMode, setIsChallengeMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Maximum token wager limit
   const MAX_TOKEN_WAGER = 5;
@@ -97,7 +98,7 @@ const BattleSetupPage = () => {
     toast.success("Link code copied to clipboard");
   };
   
-  const handleBattleStart = () => {
+  const handleBattleStart = async () => {
     // Validate form
     if (!opponentName) {
       toast.error("Please enter an opponent name");
@@ -116,10 +117,12 @@ const BattleSetupPage = () => {
       return;
     }
     
+    setIsSubmitting(true);
+    
     if (isChallengeMode) {
       // Create battle request
       try {
-        const request = createBattleRequest({
+        await createBattleRequest({
           facilityId: facilityId || "",
           facilityName: facility?.name || "Battle Arena",
           battleStyle: battleFormat,
@@ -138,10 +141,14 @@ const BattleSetupPage = () => {
         setShowLinkCodeDialog(true);
       } catch (error) {
         toast.error("Failed to create battle request");
+        console.error(error);
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       // Generate link code and proceed to battle
       generateLinkCode();
+      setIsSubmitting(false);
     }
   };
   

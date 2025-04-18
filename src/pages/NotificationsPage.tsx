@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Bell, BadgeCheck, CheckCheck, Shield, X, Clock } from "lucide-react";
 import { BottomNavigation } from "@/components/bottom-navigation";
@@ -10,12 +10,31 @@ import { toast } from "@/components/ui/sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DiscordNotificationCard } from "@/components/discord-notification-card";
 import { useDiscord } from "@/hooks/use-discord";
+import { BattleRequest } from "@/types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const NotificationsPage = () => {
-  const { battleRequests, acceptBattleRequest, cancelBattleRequest } = useTrainer();
+  const { battleRequests, acceptBattleRequest, cancelBattleRequest, getBattleRequests } = useTrainer();
   const [notifications, setNotifications] = useState(mockNotifications);
   const { isLoading: isDiscordLoading, isConnected: isDiscordConnected } = useDiscord();
+  const [openRequests, setOpenRequests] = useState<BattleRequest[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    const fetchOpenRequests = async () => {
+      try {
+        const requests = await getBattleRequests();
+        setOpenRequests(requests.filter(req => req.status === "open"));
+      } catch (error) {
+        console.error("Error fetching battle requests:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchOpenRequests();
+  }, [getBattleRequests]);
   
   const getIcon = (type: string) => {
     switch (type) {
@@ -139,9 +158,15 @@ const NotificationsPage = () => {
     }
   };
 
-  const handleRejectBattleRequest = (requestId: string) => {
-    cancelBattleRequest(requestId);
-    toast.info("Battle request rejected");
+  const handleRejectBattleRequest = async (requestId: string) => {
+    try {
+      await cancelBattleRequest(requestId);
+      setOpenRequests(prev => prev.filter(req => req.id !== requestId));
+      toast.info("Battle request rejected");
+    } catch (error) {
+      console.error("Error rejecting battle request:", error);
+      toast.error("Failed to reject battle request");
+    }
   };
   
   const sortedNotifications = [...notifications].sort((a, b) => {
@@ -150,11 +175,15 @@ const NotificationsPage = () => {
     }
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
-
-  const openBattleRequests = battleRequests.filter(
-    request => request.status === "open"
-  );
   
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-20">
       <header className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10">
@@ -184,7 +213,7 @@ const NotificationsPage = () => {
           </div>
         )}
         
-        {openBattleRequests.length > 0 && (
+        {openRequests.length > 0 && (
           <div className="mb-6">
             <h2 className="text-lg font-semibold mb-3 flex items-center">
               <Shield className="h-5 w-5 mr-2 text-atl-primary-purple" />
@@ -192,7 +221,7 @@ const NotificationsPage = () => {
             </h2>
             
             <div className="space-y-3">
-              {openBattleRequests.map((request) => (
+              {openRequests.map((request) => (
                 <div 
                   key={request.id}
                   className="bg-white rounded-lg shadow-sm border-l-4 border-l-atl-primary-purple p-4"

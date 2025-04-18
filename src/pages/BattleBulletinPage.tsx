@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTrainer } from "@/context/trainer-context";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Clock, Sword, Coins, Filter, PlusCircle, X } from "lucide-react";
@@ -21,6 +21,9 @@ const BattleBulletinPage = () => {
   const { trainer, battleRequests, createBattleRequest, acceptBattleRequest, cancelBattleRequest, getBattleRequests, getMyBattleRequests } = useTrainer();
   const [currentTab, setCurrentTab] = useState("browse");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = useState<BattleRequest[]>([]);
+  const [myRequests, setMyRequests] = useState<BattleRequest[]>([]);
   
   // Filter states
   const [facilityFilter, setFacilityFilter] = useState<string>("");
@@ -37,6 +40,28 @@ const BattleBulletinPage = () => {
     tokensWagered: 1,
     notes: ""
   });
+  
+  // Fetch battle requests when tab changes
+  useEffect(() => {
+    const fetchRequests = async () => {
+      setLoading(true);
+      try {
+        if (currentTab === "browse") {
+          const data = await getBattleRequests();
+          setRequests(data);
+        } else {
+          const data = await getMyBattleRequests();
+          setMyRequests(data);
+        }
+      } catch (error) {
+        console.error("Error fetching requests:", error);
+        toast.error("Failed to fetch battle requests");
+      }
+      setLoading(false);
+    };
+    
+    fetchRequests();
+  }, [currentTab, getBattleRequests, getMyBattleRequests]);
   
   // Mock facilities data for selecting in the post form
   const facilities: Facility[] = [
@@ -89,27 +114,35 @@ const BattleBulletinPage = () => {
   };
   
   // Handle submitting a new battle request
-  const handleSubmitRequest = () => {
+  const handleSubmitRequest = async () => {
     // Validate the form
     if (!newRequest.facilityId || !newRequest.time || newRequest.tokensWagered < 1) {
       toast.error("Please fill out all required fields");
       return;
     }
     
-    createBattleRequest(newRequest);
-    
-    // Reset form
-    setNewRequest({
-      facilityId: "",
-      facilityName: "",
-      battleStyle: "Singles",
-      time: "",
-      tokensWagered: 1,
-      notes: ""
-    });
-    
-    // Switch to My Requests tab
-    setCurrentTab("my-requests");
+    try {
+      await createBattleRequest(newRequest);
+      
+      // Reset form
+      setNewRequest({
+        facilityId: "",
+        facilityName: "",
+        battleStyle: "Singles",
+        time: "",
+        tokensWagered: 1,
+        notes: ""
+      });
+      
+      // Switch to My Requests tab
+      setCurrentTab("my-requests");
+      
+      // Refresh my requests
+      const updatedMyRequests = await getMyBattleRequests();
+      setMyRequests(updatedMyRequests);
+    } catch (error) {
+      console.error("Error creating battle request:", error);
+    }
   };
   
   // Handle accepting a battle request
@@ -123,12 +156,19 @@ const BattleBulletinPage = () => {
   };
   
   // Handle canceling a battle request
-  const handleCancel = (requestId: string) => {
-    cancelBattleRequest(requestId);
+  const handleCancel = async (requestId: string) => {
+    try {
+      await cancelBattleRequest(requestId);
+      // Update the UI after cancellation
+      const updatedMyRequests = await getMyBattleRequests();
+      setMyRequests(updatedMyRequests);
+    } catch (error) {
+      console.error("Error canceling request:", error);
+    }
   };
   
   // Filter battle requests based on current filters
-  const filteredRequests = getBattleRequests().filter(request => {
+  const filteredRequests = requests.filter(request => {
     if (facilityFilter && request.facilityId !== facilityFilter) return false;
     if (battleStyleFilter && request.battleStyle !== battleStyleFilter) return false;
     if (minTokensFilter && request.tokensWagered < parseInt(minTokensFilter)) return false;
@@ -143,9 +183,6 @@ const BattleBulletinPage = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  
-  // My battle requests
-  const myRequests = getMyBattleRequests();
   
   // Format time from ISO string to readable format
   const formatTime = (isoString: string) => {
@@ -176,6 +213,14 @@ const BattleBulletinPage = () => {
   };
 
   if (!trainer) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />

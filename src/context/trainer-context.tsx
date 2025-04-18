@@ -1,3 +1,4 @@
+
 import { 
   ReactNode, 
   createContext, 
@@ -77,36 +78,28 @@ const mockTrainers: Trainer[] = [
   }
 ];
 
-const mockBattleRequests: BattleRequest[] = [
+// Define mock battles to fix the mockBattles error
+const mockBattles: Battle[] = [
   {
-    id: "br1",
-    trainerId: "t2",
-    trainerName: "Blue",
-    trainerAvatar: "/assets/trainers/blue.png",
-    trainerClass: "Rival",
+    id: "b1",
+    opponentId: "T54321",
+    opponentName: "Gary Oak",
     facilityId: "f1",
-    facilityName: "Battle Tower",
-    battleStyle: "Singles",
-    time: "2023-05-17T14:30:00Z",
-    tokensWagered: 2,
-    notes: "Looking for a challenge!",
-    status: "open",
-    createdAt: "2023-05-17T10:15:00Z",
+    result: "win",
+    tokensWagered: 5,
+    date: "2023-05-15T14:30:00Z",
+    status: "completed"
   },
   {
-    id: "br2",
-    trainerId: "t3",
-    trainerName: "Red",
-    trainerAvatar: "/assets/trainers/red.png",
-    trainerClass: "Champion",
+    id: "b2",
+    opponentId: "T98765",
+    opponentName: "Misty",
     facilityId: "f2",
-    facilityName: "Battle Dome",
-    battleStyle: "Singles",
-    time: "2023-05-17T16:00:00Z",
+    result: "loss",
     tokensWagered: 3,
-    status: "open",
-    createdAt: "2023-05-17T11:30:00Z",
-  },
+    date: "2023-05-14T10:15:00Z",
+    status: "completed"
+  }
 ];
 
 interface TrainerContextType {
@@ -122,12 +115,12 @@ interface TrainerContextType {
   updateTeam: (team: Pokemon[]) => void;
   addBattle: (battle: Omit<Battle, "id" | "date">) => Battle;
   getBattleHistory: () => Battle[];
-  createBattleRequest: (request: Omit<BattleRequest, "id" | "createdAt" | "trainerId" | "trainerName" | "trainerAvatar" | "trainerClass" | "status">) => BattleRequest;
-  updateBattleRequest: (id: string, updates: Partial<BattleRequest>) => void;
+  createBattleRequest: (request: Omit<BattleRequest, "id" | "createdAt" | "trainerId" | "trainerName" | "trainerAvatar" | "trainerClass" | "status">) => Promise<BattleRequest>;
+  updateBattleRequest: (id: string, updates: Partial<BattleRequest>) => Promise<void>;
   acceptBattleRequest: (id: string) => Battle | undefined;
-  cancelBattleRequest: (id: string) => void;
-  getBattleRequests: () => BattleRequest[];
-  getMyBattleRequests: () => BattleRequest[];
+  cancelBattleRequest: (id: string) => Promise<void>;
+  getBattleRequests: () => Promise<BattleRequest[]>;
+  getMyBattleRequests: () => Promise<BattleRequest[]>;
   getAllTrainers: () => Trainer[];
   startBattle: (battleId: string) => void;
   getReadyBattles: () => Battle[];
@@ -158,7 +151,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       }
       
       setBattles(mockBattles);
-      setBattleRequests(mockBattleRequests);
+      // Battle requests will be loaded from Supabase
     } else {
       setTrainer(null);
       setBattles([]);
@@ -336,7 +329,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
         time: data.time,
         tokensWagered: data.tokens_wagered,
         notes: data.notes,
-        status: data.status,
+        status: data.status as "open" | "accepted" | "completed" | "canceled",
         createdAt: data.created_at,
         opponentId: data.opponent_id
       };
@@ -378,14 +371,14 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     try {
       const { error } = await supabase
         .from('battle_requests')
-        .update({ status: 'canceled' })
+        .update({ status: 'canceled' as "open" | "accepted" | "completed" | "canceled" })
         .eq('id', id);
 
       if (error) throw error;
 
       setBattleRequests(prev => 
         prev.map(request => 
-          request.id === id ? { ...request, status: 'canceled' } : request
+          request.id === id ? { ...request, status: 'canceled' as "open" | "accepted" | "completed" | "canceled" } : request
         )
       );
       
@@ -396,7 +389,37 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const getBattleRequests = async () => {
+  // Implement acceptBattleRequest function
+  const acceptBattleRequest = (id: string): Battle | undefined => {
+    const request = battleRequests.find(r => r.id === id);
+    if (!request) {
+      toast.error("Battle request not found");
+      return undefined;
+    }
+    
+    // Update the request status in Supabase
+    updateBattleRequest(id, { 
+      status: "accepted" as "open" | "accepted" | "completed" | "canceled",
+      opponentId: trainer?.id 
+    }).catch(err => {
+      console.error("Failed to update battle request:", err);
+    });
+    
+    // Create a new battle from the request
+    const battle = addBattle({
+      opponentId: request.trainerId,
+      opponentName: request.trainerName,
+      facilityId: request.facilityId,
+      result: "pending",
+      tokensWagered: request.tokensWagered,
+      notes: request.notes,
+      status: "ready"
+    });
+    
+    return battle;
+  };
+
+  const getBattleRequests = async (): Promise<BattleRequest[]> => {
     try {
       const { data, error } = await supabase
         .from('battle_requests')
@@ -418,7 +441,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
         time: request.time,
         tokensWagered: request.tokens_wagered,
         notes: request.notes,
-        status: request.status,
+        status: request.status as "open" | "accepted" | "completed" | "canceled",
         createdAt: request.created_at,
         opponentId: request.opponent_id
       }));
@@ -428,7 +451,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const getMyBattleRequests = async () => {
+  const getMyBattleRequests = async (): Promise<BattleRequest[]> => {
     if (!trainer) return [];
 
     try {
@@ -452,7 +475,7 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
         time: request.time,
         tokensWagered: request.tokens_wagered,
         notes: request.notes,
-        status: request.status,
+        status: request.status as "open" | "accepted" | "completed" | "canceled",
         createdAt: request.created_at,
         opponentId: request.opponent_id
       }));
