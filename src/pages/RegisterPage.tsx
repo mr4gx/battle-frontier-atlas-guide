@@ -53,18 +53,18 @@ const RegisterPage = () => {
 
   return (
     <div className="atl-gradient-bg min-h-screen flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-6 sm:mb-8">
             <Logo variant="full" size="md" />
           </div>
           
-          <div className="bg-white rounded-lg p-6 shadow-lg border border-atl-light-purple/30">
-            <h1 className="text-2xl font-bold mb-6 text-center text-atl-dark-purple">
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg border border-atl-light-purple/30">
+            <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-atl-dark-purple">
               Register New Trainer
             </h1>
             
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-6 p-2 bg-atl-light-purple/10 rounded-lg border border-atl-light-purple/20">
               <AvatarUpload onUpload={url => setAvatarUrl(url)} />
             </div>
 
@@ -84,7 +84,7 @@ const RegisterPage = () => {
               </div>
             )}
             
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div>
                 <label className="block text-sm font-medium mb-1" htmlFor="name">
                   Trainer Name *

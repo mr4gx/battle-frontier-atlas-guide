@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { User, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AvatarUploadProps {
   onUpload: (url: string) => void;
@@ -14,6 +15,7 @@ export const AvatarUpload = ({ onUpload }: AvatarUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   const uploadAvatar = async (file: File) => {
     try {
@@ -58,18 +60,26 @@ export const AvatarUpload = ({ onUpload }: AvatarUploadProps) => {
     uploadAvatar(file);
   };
 
+  // Adjust sizes based on device
+  const avatarSize = isMobile ? "h-24 w-24" : "h-32 w-32";
+  const iconSize = isMobile ? "h-12 w-12" : "h-16 w-16";
+  const uploadIconSize = isMobile ? "h-8 w-8" : "h-10 w-10";
+
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-      <div className="relative">
-        <Avatar className="h-32 w-32 cursor-pointer border-4 border-atl-primary-purple" onClick={() => fileInputRef.current?.click()}>
+    <div className="flex flex-col items-center gap-4 w-full max-w-xs mx-auto">
+      <div className="relative w-full flex justify-center">
+        <Avatar 
+          className={`${avatarSize} cursor-pointer border-4 border-atl-primary-purple`} 
+          onClick={() => fileInputRef.current?.click()}
+        >
           <AvatarImage src={preview || ''} className="object-cover" />
           <AvatarFallback className="bg-atl-light-purple/20">
-            <User className="h-16 w-16 text-atl-dark-purple" />
+            <User className={`${iconSize} text-atl-dark-purple`} />
           </AvatarFallback>
         </Avatar>
         {!preview && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full">
-            <Upload className="h-10 w-10 text-white" />
+            <Upload className={`${uploadIconSize} text-white`} />
           </div>
         )}
       </div>
@@ -86,7 +96,7 @@ export const AvatarUpload = ({ onUpload }: AvatarUploadProps) => {
       <Button 
         variant="outline" 
         size="lg"
-        className="gap-2 w-full bg-atl-light-purple/10 hover:bg-atl-light-purple/20"
+        className="gap-2 w-full bg-atl-light-purple/10 hover:bg-atl-light-purple/20 text-atl-dark-purple font-medium"
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
       >
