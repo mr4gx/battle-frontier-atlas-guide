@@ -1,24 +1,29 @@
 
 import React from "react";
 
-interface DiscordIconProps extends React.SVGProps<SVGSVGElement> {
+interface DiscordIconProps {
   size?: number;
   className?: string;
+  style?: React.CSSProperties;
+  alt?: string;
 }
 
 export const DiscordIcon = ({ 
   size = 24, 
   className = "", 
+  style,
+  alt = "Discord icon",
   ...props 
 }: DiscordIconProps) => {
   return (
     <img
-      src="/public/lovable-uploads/bb683c9c-9f15-4778-a026-dbd24ac41c4d.png"
-      alt="Discord icon"
+      src="/lovable-uploads/bb683c9c-9f15-4778-a026-dbd24ac41c4d.png"
+      alt={alt}
       width={size}
       height={size}
       className={`inline-block ${className}`}
-      {...props}
+      style={style}
+      {...props as React.ImgHTMLAttributes<HTMLImageElement>}
     />
   );
 };
