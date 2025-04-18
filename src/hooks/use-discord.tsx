@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,10 +32,9 @@ export function useDiscord() {
   const [connection, setConnection] = useState<DiscordConnection | null>(null);
   const [notificationPreferences, setNotificationPreferences] = useState<DiscordNotificationPreferences | null>(null);
 
-  const DISCORD_CLIENT_ID = "YOUR_DISCORD_CLIENT_ID"; // You should replace this with your actual client ID
+  const DISCORD_CLIENT_ID = "1234567890123456789"; // Replace with your actual Discord client ID
   const REDIRECT_URI = "https://udsproxacchluxotubqc.supabase.co/functions/v1/discord-auth-callback";
 
-  // Fetch Discord connection status
   const fetchDiscordConnection = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
@@ -71,7 +69,6 @@ export function useDiscord() {
     }
   }, [user]);
 
-  // Fetch notification preferences
   const fetchNotificationPreferences = useCallback(async () => {
     if (!user || !isConnected) {
       return;
@@ -100,7 +97,6 @@ export function useDiscord() {
     }
   }, [user, isConnected]);
 
-  // Update notification preferences
   const updateNotificationPreferences = async (preferences: Partial<DiscordNotificationPreferences>) => {
     if (!user) return;
 
@@ -130,7 +126,6 @@ export function useDiscord() {
     }
   };
 
-  // Disconnect Discord
   const disconnectDiscord = async () => {
     if (!user) return;
 
@@ -157,7 +152,6 @@ export function useDiscord() {
     }
   };
 
-  // Generate Discord auth URL
   const getDiscordAuthUrl = (redirectPath = '/profile') => {
     if (!user) return '';
 
@@ -169,7 +163,6 @@ export function useDiscord() {
     return `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify%20guilds%20messages.read&state=${state}`;
   };
 
-  // Connect to Discord
   const connectToDiscord = (redirectPath = '/profile') => {
     const authUrl = getDiscordAuthUrl(redirectPath);
     if (authUrl) {
@@ -177,7 +170,6 @@ export function useDiscord() {
     }
   };
 
-  // Load data on component mount and when auth state changes
   useEffect(() => {
     fetchDiscordConnection();
   }, [fetchDiscordConnection]);

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { useTrainer } from "@/context/trainer-context";
 import { toast } from "@/components/ui/sonner";
+import { QrReader } from "react-qr-reader";
 
 const QRScannerPage = () => {
   const { getTrainerByIdOrName } = useTrainer();
@@ -20,21 +21,10 @@ const QRScannerPage = () => {
   const [flashOn, setFlashOn] = useState(false);
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [recentScans, setRecentScans] = useState<string[]>([]);
+  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   
-  // Mock scanner function - in a real app, we'd use a QR scanner library
-  useEffect(() => {
-    if (!isScanning) return;
-    
-    // Simulate scanning after 3 seconds
-    const timer = setTimeout(() => {
-      const mockResults = [
-        "T54321|Gary Oak",
-        "T98765|Misty",
-        "T24680|Brock",
-        "T13579|Dawn"
-      ];
-      
-      const result = mockResults[Math.floor(Math.random() * mockResults.length)];
+  const handleScan = (result: string | null) => {
+    if (result && isScanning) {
       setScanResult(result);
       setIsScanning(false);
       
@@ -43,10 +33,10 @@ const QRScannerPage = () => {
         const newScans = [result, ...prev];
         return newScans.slice(0, 5); // Keep only last 5
       });
-    }, 3000);
-    
-    return () => clearTimeout(timer);
-  }, [isScanning]);
+      
+      toast.success("QR Code successfully scanned!");
+    }
+  };
   
   const handleScanAgain = () => {
     setScanResult(null);
@@ -113,6 +103,11 @@ const QRScannerPage = () => {
   
   const toggleFlash = () => {
     setFlashOn(!flashOn);
+    // In a real app, this would toggle the device flash using a camera API
+  };
+  
+  const toggleCamera = () => {
+    setFacingMode(prev => prev === "environment" ? "user" : "environment");
   };
   
   return (
@@ -128,17 +123,26 @@ const QRScannerPage = () => {
               {isBattleChallenge ? "Scan Trainer QR" : "QR Scanner"}
             </h1>
           </div>
-          <Button 
-            variant={flashOn ? "default" : "outline"} 
-            size="sm"
-            onClick={toggleFlash}
-          >
-            {flashOn ? (
-              <Zap className="h-4 w-4" />
-            ) : (
-              <ZapOff className="h-4 w-4" />
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={toggleCamera}
+            >
+              <Scan className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant={flashOn ? "default" : "outline"} 
+              size="sm"
+              onClick={toggleFlash}
+            >
+              {flashOn ? (
+                <Zap className="h-4 w-4" />
+              ) : (
+                <ZapOff className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
         {isBattleChallenge && (
           <p className="text-sm text-gray-500 mt-1">
@@ -151,16 +155,29 @@ const QRScannerPage = () => {
         {/* Scanner Viewfinder */}
         <div className="relative w-full aspect-square max-w-md mb-6 bg-black rounded-lg overflow-hidden">
           {isScanning ? (
-            <>
-              {/* This is a mock scanner UI - in a real app would be camera feed */}
-              <div className="absolute inset-0 bg-black">
-                <div className="w-full h-full flex items-center justify-center text-white">
-                  <span className="text-lg">Camera feed placeholder</span>
-                </div>
-              </div>
+            <div className="absolute inset-0">
+              <QrReader
+                onResult={(result, error) => {
+                  if (result) {
+                    handleScan(result.getText());
+                  }
+                  
+                  if (error) {
+                    console.error(error);
+                  }
+                }}
+                constraints={{
+                  facingMode: facingMode,
+                  aspectRatio: 1
+                }}
+                className="w-full h-full"
+                videoStyle={{ objectFit: "cover", width: "100%", height: "100%" }}
+                videoContainerStyle={{ width: "100%", height: "100%" }}
+                scanDelay={500}
+              />
               
               {/* Scanning overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
                 <div className="w-3/4 h-3/4 border-2 border-atl-primary-purple relative">
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-atl-primary-purple"></div>
                   <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-atl-primary-purple"></div>
@@ -175,7 +192,7 @@ const QRScannerPage = () => {
               <div className="absolute bottom-4 left-0 right-0 text-center text-white text-sm">
                 Scanning...
               </div>
-            </>
+            </div>
           ) : (
             <div className="absolute inset-0 bg-white flex flex-col items-center justify-center p-4">
               {scanResult ? (

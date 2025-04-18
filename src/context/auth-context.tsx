@@ -1,3 +1,4 @@
+
 import { 
   ReactNode, 
   createContext, 
@@ -78,6 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         errorMessage = 'Failed to fetch Discord user data. Please try again.';
       } else if (discordError === 'db_error') {
         errorMessage = 'Failed to save Discord connection. Please try again.';
+      } else if (discordError === 'missing_parameters') {
+        errorMessage = 'Missing required parameters for Discord connection.';
       }
       
       toast.error('Discord Connection Failed', {
