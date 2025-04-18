@@ -1,4 +1,3 @@
-
 import { 
   ReactNode, 
   createContext, 
@@ -17,13 +16,21 @@ interface User {
   name: string;
 }
 
+interface RegisterOptions {
+  avatarUrl?: string;
+  twitterUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  twitchUrl?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, options?: RegisterOptions) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, name: string) => {
+  const register = async (email: string, password: string, name: string, options?: RegisterOptions) => {
     setIsLoading(true);
     
     try {
@@ -125,33 +132,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name
         };
         
-        // Set initial tokens for new trainers
-        const initialTokens = 5;
-        
         // Store user in local storage
         setUser(user);
         localStorage.setItem("atlUser", JSON.stringify(user));
         
-        // Set initial trainer data with tokens
+        // Set initial trainer data with tokens and social links
         const trainerData = {
           id: user.id,
           name: user.name,
-          avatar: "/assets/trainers/default.png",
+          avatar: options?.avatarUrl || "/assets/trainers/default.png",
           trainerClass: "Novice",
           wins: 0,
           losses: 0,
           badges: [],
-          tokens: initialTokens,
+          tokens: 5,
           team: [],
-          achievementBadges: []
+          achievementBadges: [],
+          twitterUrl: options?.twitterUrl || '',
+          instagramUrl: options?.instagramUrl || '',
+          youtubeUrl: options?.youtubeUrl || '',
+          twitchUrl: options?.twitchUrl || ''
         };
         
-        // Store trainer data in local storage
         localStorage.setItem("atlTrainer", JSON.stringify(trainerData));
         
-        // Show welcome toast with token info
         toast.success(`Welcome, Trainer ${name}!`, {
-          description: `You've received ${initialTokens} tokens to start your journey.`
+          description: `You've received 5 tokens to start your journey.`
         });
         
         navigate("/dashboard");

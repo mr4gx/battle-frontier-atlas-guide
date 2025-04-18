@@ -81,6 +81,54 @@ export type Database = {
         }
         Relationships: []
       }
+      trainers: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          instagram_url: string | null
+          losses: number
+          name: string
+          tokens: number
+          trainer_class: string
+          twitch_url: string | null
+          twitter_url: string | null
+          updated_at: string
+          wins: number
+          youtube_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          instagram_url?: string | null
+          losses?: number
+          name: string
+          tokens?: number
+          trainer_class?: string
+          twitch_url?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          wins?: number
+          youtube_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          instagram_url?: string | null
+          losses?: number
+          name?: string
+          tokens?: number
+          trainer_class?: string
+          twitch_url?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          wins?: number
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
