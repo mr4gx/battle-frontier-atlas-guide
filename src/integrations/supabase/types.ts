@@ -9,6 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      battle_requests: {
+        Row: {
+          battle_style: string
+          created_at: string
+          facility_id: string
+          facility_name: string
+          id: string
+          notes: string | null
+          opponent_id: string | null
+          status: string
+          time: string
+          tokens_wagered: number
+          trainer_avatar: string | null
+          trainer_class: string
+          trainer_id: string
+          trainer_name: string
+        }
+        Insert: {
+          battle_style: string
+          created_at?: string
+          facility_id: string
+          facility_name: string
+          id?: string
+          notes?: string | null
+          opponent_id?: string | null
+          status?: string
+          time: string
+          tokens_wagered: number
+          trainer_avatar?: string | null
+          trainer_class: string
+          trainer_id: string
+          trainer_name: string
+        }
+        Update: {
+          battle_style?: string
+          created_at?: string
+          facility_id?: string
+          facility_name?: string
+          id?: string
+          notes?: string | null
+          opponent_id?: string | null
+          status?: string
+          time?: string
+          tokens_wagered?: number
+          trainer_avatar?: string | null
+          trainer_class?: string
+          trainer_id?: string
+          trainer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_requests_opponent_id_fkey"
+            columns: ["opponent_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "battle_requests_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discord_connections: {
         Row: {
           created_at: string

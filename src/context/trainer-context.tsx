@@ -6,10 +6,11 @@ import {
   useEffect 
 } from "react";
 import { Trainer, Badge, Pokemon, Battle, BattleRequest } from "@/types";
-import { mockTrainer, mockBattles } from "@/data/mock-data";
+import { mockTrainer } from "@/data/mock-data";
 import { useAuth } from "./auth-context";
 import { toast } from "@/components/ui/sonner";
 import { BadgeAchievementToast } from "@/components/ui/badge-achievement-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { mockFacilities } from "@/data/mock-data";
 
 const mockTrainers: Trainer[] = [
@@ -299,95 +300,166 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const createBattleRequest = (request: Omit<BattleRequest, "id" | "createdAt" | "trainerId" | "trainerName" | "trainerAvatar" | "trainerClass" | "status">) => {
+  const createBattleRequest = async (request: Omit<BattleRequest, "id" | "createdAt" | "trainerId" | "trainerName" | "trainerAvatar" | "trainerClass" | "status">) => {
     if (!trainer) throw new Error("No trainer logged in");
-    
-    const newBattleRequest: BattleRequest = {
-      ...request,
-      id: `br${Date.now()}`,
-      trainerId: trainer.id,
-      trainerName: trainer.name,
-      trainerAvatar: trainer.avatar,
-      trainerClass: trainer.trainerClass,
-      status: "open",
-      createdAt: new Date().toISOString()
-    };
-    
-    setBattleRequests(prev => [newBattleRequest, ...prev]);
-    
-    toast.success("Battle request sent successfully!");
 
-    toast.info(`Battle request sent to ${request.opponentId ? `trainer ID: ${request.opponentId}` : "opponent"}`);
-    
-    return newBattleRequest;
-  };
+    try {
+      const { data, error } = await supabase
+        .from('battle_requests')
+        .insert({
+          trainer_id: trainer.id,
+          trainer_name: trainer.name,
+          trainer_avatar: trainer.avatar,
+          trainer_class: trainer.trainerClass,
+          facility_id: request.facilityId,
+          facility_name: request.facilityName,
+          battle_style: request.battleStyle,
+          time: request.time,
+          tokens_wagered: request.tokensWagered,
+          notes: request.notes,
+          opponent_id: request.opponentId
+        })
+        .select()
+        .single();
 
-  const updateBattleRequest = (id: string, updates: Partial<BattleRequest>) => {
-    setBattleRequests(prev => 
-      prev.map(request => 
-        request.id === id ? { ...request, ...updates } : request
-      )
-    );
-  };
+      if (error) throw error;
 
-  const acceptBattleRequest = (id: string) => {
-    const request = battleRequests.find(r => r.id === id);
-    
-    if (!request || request.status !== "open") {
-      toast.error("Battle request not available");
-      return;
+      const newRequest: BattleRequest = {
+        id: data.id,
+        trainerId: data.trainer_id,
+        trainerName: data.trainer_name,
+        trainerAvatar: data.trainer_avatar,
+        trainerClass: data.trainer_class,
+        facilityId: data.facility_id,
+        facilityName: data.facility_name,
+        battleStyle: data.battle_style,
+        time: data.time,
+        tokensWagered: data.tokens_wagered,
+        notes: data.notes,
+        status: data.status,
+        createdAt: data.created_at,
+        opponentId: data.opponent_id
+      };
+
+      setBattleRequests(prev => [newRequest, ...prev]);
+      
+      toast.success("Battle request sent successfully!");
+      return newRequest;
+    } catch (error: any) {
+      toast.error("Failed to create battle request");
+      throw error;
     }
-    
-    updateBattleRequest(id, { status: "accepted" });
-    
-    const linkCode = Math.floor(10000000 + Math.random() * 90000000).toString();
-    
-    const battle = addBattle({
-      opponentId: request.trainerId,
-      opponentName: request.trainerName,
-      facilityId: request.facilityId,
-      tokensWagered: request.tokensWagered,
-      result: "pending",
-      linkCode: linkCode,
-      status: "ready"
-    });
-    
-    toast.success(`You accepted a battle with ${request.trainerName}!`);
-    
-    toast.info(`Link code for this battle: ${linkCode}`);
-    
-    subtractTokens(request.tokensWagered);
-    
-    return battle;
   };
 
-  const cancelBattleRequest = (id: string) => {
-    const request = battleRequests.find(r => r.id === id);
-    
-    if (!request) {
-      toast.error("Battle request not found");
-      return;
+  const updateBattleRequest = async (id: string, updates: Partial<BattleRequest>) => {
+    try {
+      const { error } = await supabase
+        .from('battle_requests')
+        .update({
+          status: updates.status,
+          opponent_id: updates.opponentId
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setBattleRequests(prev => 
+        prev.map(request => 
+          request.id === id ? { ...request, ...updates } : request
+        )
+      );
+    } catch (error: any) {
+      toast.error("Failed to update battle request");
+      throw error;
     }
-    
-    if (request.trainerId !== trainer?.id) {
-      toast.error("You can only cancel your own battle requests");
-      return;
+  };
+
+  const cancelBattleRequest = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('battle_requests')
+        .update({ status: 'canceled' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setBattleRequests(prev => 
+        prev.map(request => 
+          request.id === id ? { ...request, status: 'canceled' } : request
+        )
+      );
+      
+      toast.info("Battle request canceled");
+    } catch (error: any) {
+      toast.error("Failed to cancel battle request");
+      throw error;
     }
-    
-    updateBattleRequest(id, { status: "canceled" });
-    toast.info("Battle request canceled");
   };
 
-  const getBattleRequests = () => {
-    return battleRequests
-      .filter(request => request.status === "open" && request.trainerId !== trainer?.id)
-      .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  const getBattleRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('battle_requests')
+        .select('*')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return data.map((request): BattleRequest => ({
+        id: request.id,
+        trainerId: request.trainer_id,
+        trainerName: request.trainer_name,
+        trainerAvatar: request.trainer_avatar,
+        trainerClass: request.trainer_class,
+        facilityId: request.facility_id,
+        facilityName: request.facility_name,
+        battleStyle: request.battle_style,
+        time: request.time,
+        tokensWagered: request.tokens_wagered,
+        notes: request.notes,
+        status: request.status,
+        createdAt: request.created_at,
+        opponentId: request.opponent_id
+      }));
+    } catch (error: any) {
+      console.error("Failed to fetch battle requests:", error);
+      return [];
+    }
   };
 
-  const getMyBattleRequests = () => {
-    return battleRequests
-      .filter(request => request.trainerId === trainer?.id)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const getMyBattleRequests = async () => {
+    if (!trainer) return [];
+
+    try {
+      const { data, error } = await supabase
+        .from('battle_requests')
+        .select('*')
+        .eq('trainer_id', trainer.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return data.map((request): BattleRequest => ({
+        id: request.id,
+        trainerId: request.trainer_id,
+        trainerName: request.trainer_name,
+        trainerAvatar: request.trainer_avatar,
+        trainerClass: request.trainer_class,
+        facilityId: request.facility_id,
+        facilityName: request.facility_name,
+        battleStyle: request.battle_style,
+        time: request.time,
+        tokensWagered: request.tokens_wagered,
+        notes: request.notes,
+        status: request.status,
+        createdAt: request.created_at,
+        opponentId: request.opponent_id
+      }));
+    } catch (error: any) {
+      console.error("Failed to fetch my battle requests:", error);
+      return [];
+    }
   };
 
   const getAllTrainers = () => {
@@ -448,6 +520,39 @@ export function TrainerProvider({ children }: { children: ReactNode }) {
       battle.status === "active" && battle.result === "pending"
     );
   };
+
+  // Add real-time subscription for battle requests
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('battle-requests-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'battle_requests'
+        },
+        async (payload) => {
+          // Refresh the battle requests list when changes occur
+          const requests = await getBattleRequests();
+          setBattleRequests(requests);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated]);
+
+  // Initial fetch of battle requests
+  useEffect(() => {
+    if (isAuthenticated) {
+      getBattleRequests().then(setBattleRequests);
+    }
+  }, [isAuthenticated]);
 
   return (
     <TrainerContext.Provider
