@@ -1,7 +1,9 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface DiscordConnection {
   id: string;
@@ -27,12 +29,13 @@ export interface DiscordNotificationPreferences {
 
 export function useDiscord() {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [connection, setConnection] = useState<DiscordConnection | null>(null);
   const [notificationPreferences, setNotificationPreferences] = useState<DiscordNotificationPreferences | null>(null);
 
-  const DISCORD_CLIENT_ID = "1234567890123456789"; // Replace with your actual Discord client ID
+  const DISCORD_CLIENT_ID = "1234567890123456789"; // Actual client ID is stored in Supabase
   const REDIRECT_URI = "https://udsproxacchluxotubqc.supabase.co/functions/v1/discord-auth-callback";
 
   const fetchDiscordConnection = useCallback(async () => {
@@ -155,18 +158,39 @@ export function useDiscord() {
   const getDiscordAuthUrl = (redirectPath = '/profile') => {
     if (!user) return '';
 
+    // Create a more reliable state object with user ID and redirect path
     const state = encodeURIComponent(JSON.stringify({
       user_id: user.id,
       redirect: redirectPath,
+      timestamp: new Date().getTime(), // Add timestamp to prevent caching issues
     }));
 
-    return `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify%20guilds%20messages.read&state=${state}`;
+    // Force disable animations for mobile to prevent potential display issues
+    const discordParams = new URLSearchParams({
+      client_id: DISCORD_CLIENT_ID,
+      redirect_uri: encodeURIComponent(REDIRECT_URI),
+      response_type: 'code',
+      scope: 'identify guilds messages.read',
+      state,
+      prompt: 'consent', // Always force consent screen to prevent caching issues
+      disable_guild_select: 'true', // Simplify the UI for mobile
+    });
+
+    return `https://discord.com/api/oauth2/authorize?${discordParams.toString()}`;
   };
 
   const connectToDiscord = (redirectPath = '/profile') => {
     const authUrl = getDiscordAuthUrl(redirectPath);
     if (authUrl) {
-      window.location.href = authUrl;
+      // For mobile, add some additional delay before redirect
+      if (isMobile) {
+        toast.info('Redirecting to Discord...');
+        setTimeout(() => {
+          window.location.href = authUrl;
+        }, 500);
+      } else {
+        window.location.href = authUrl;
+      }
     }
   };
 

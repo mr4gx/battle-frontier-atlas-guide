@@ -1,4 +1,3 @@
-
 import { 
   ReactNode, 
   createContext, 
@@ -92,6 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.history.replaceState({}, document.title, newUrl);
     }
   }, [location.search]);
+
+  // Add listener for messages from popup window (for mobile auth flow)
+  useEffect(() => {
+    const handleAuthMessage = (event: MessageEvent) => {
+      if (event.data.type === 'DISCORD_AUTH_SUCCESS') {
+        toast.success('Discord account connected successfully!', {
+          description: 'You can now receive notifications through Discord.',
+        });
+      } else if (event.data.type === 'DISCORD_AUTH_ERROR') {
+        toast.error('Discord Connection Failed', {
+          description: event.data.message || 'Failed to connect Discord account.',
+        });
+      }
+    };
+
+    window.addEventListener('message', handleAuthMessage);
+    return () => window.removeEventListener('message', handleAuthMessage);
+  }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
