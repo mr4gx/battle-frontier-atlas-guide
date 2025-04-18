@@ -52,7 +52,6 @@ const TeamManagementPage = () => {
   
   const handleRemovePokemon = (index: number) => {
     const updatedTeam = [...team];
-    // Create an empty Pokemon slot
     updatedTeam[index] = {
       id: 0,
       name: "Empty",
@@ -267,7 +266,7 @@ const TeamManagementPage = () => {
                   placeholder="Search Pokémon..."
                   value={searchTerm}
                   onChange={handleSearch}
-                  className="pl-9"
+                  className="pl-9 bg-white text-atl-dark-purple"
                 />
               </div>
             </div>
