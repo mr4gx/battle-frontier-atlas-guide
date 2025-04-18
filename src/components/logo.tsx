@@ -22,30 +22,14 @@ export function Logo({ size = "md", variant = "full", className }: LogoProps) {
         className
       )}
     >
-      {variant === "full" ? (
-        <div className="flex items-center">
-          <div className="relative">
-            <div className="bg-atl-primary-purple h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg md:text-xl">B</span>
-            </div>
-            <div className="absolute -bottom-1 -right-1 bg-atl-bright-blue h-4 w-4 md:h-5 md:w-5 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xs md:text-sm">F</span>
-            </div>
-          </div>
-          <span className="ml-2 font-bold text-lg md:text-xl bg-gradient-to-r from-atl-primary-purple to-atl-bright-blue bg-clip-text text-transparent">
-            Atlanta Battle Frontier
-          </span>
-        </div>
-      ) : (
-        <div className="relative">
-          <div className="bg-atl-primary-purple h-full w-full rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-lg md:text-xl">B</span>
-          </div>
-          <div className="absolute -bottom-1 -right-1 bg-atl-bright-blue h-1/2 w-1/2 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xs md:text-sm">F</span>
-          </div>
-        </div>
-      )}
+      <img 
+        src="/lovable-uploads/420b0422-271a-4d3e-bc38-c95f5f8afd57.png"
+        alt="Atlanta Battle Frontier Logo"
+        className={cn(
+          "object-contain",
+          sizeClasses[size]
+        )}
+      />
     </div>
   );
 }
