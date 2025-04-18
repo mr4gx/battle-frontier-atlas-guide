@@ -10,6 +10,7 @@ import { useTrainer } from "@/context/trainer-context";
 import { TokenDisplay } from "@/components/token-display";
 import { PokemonSprite } from "@/components/pokemon-sprite";
 import { DiscordSettings } from "@/components/discord-settings";
+import { DiscordIcon } from "@/components/discord-icon";
 
 const ProfilePage = () => {
   const { trainer, updateTrainer } = useTrainer();
@@ -153,7 +154,9 @@ const ProfilePage = () => {
         </section>
         
         <section className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 text-white">Discord Integration</h2>
+          <h2 className="text-lg font-semibold mb-3 text-white flex items-center">
+            <DiscordIcon size={20} className="mr-2" /> Discord Integration
+          </h2>
           <DiscordSettings />
         </section>
         
