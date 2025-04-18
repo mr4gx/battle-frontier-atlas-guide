@@ -59,7 +59,21 @@ export const AvatarUpload = ({ onUpload }: AvatarUploadProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+      <div className="relative">
+        <Avatar className="h-32 w-32 cursor-pointer border-4 border-atl-primary-purple" onClick={() => fileInputRef.current?.click()}>
+          <AvatarImage src={preview || ''} className="object-cover" />
+          <AvatarFallback className="bg-atl-light-purple/20">
+            <User className="h-16 w-16 text-atl-dark-purple" />
+          </AvatarFallback>
+        </Avatar>
+        {!preview && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full">
+            <Upload className="h-10 w-10 text-white" />
+          </div>
+        )}
+      </div>
+
       <input
         type="file"
         ref={fileInputRef}
@@ -68,23 +82,16 @@ export const AvatarUpload = ({ onUpload }: AvatarUploadProps) => {
         onChange={handleFileChange}
         disabled={uploading}
       />
-      
-      <Avatar className="h-24 w-24 cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-        <AvatarImage src={preview || ''} />
-        <AvatarFallback>
-          <User className="h-12 w-12 text-muted-foreground" />
-        </AvatarFallback>
-      </Avatar>
 
       <Button 
         variant="outline" 
-        size="sm"
-        className="gap-2"
+        size="lg"
+        className="gap-2 w-full bg-atl-light-purple/10 hover:bg-atl-light-purple/20"
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}
       >
-        <Upload className="h-4 w-4" />
-        {uploading ? 'Uploading...' : 'Upload Avatar'}
+        <Upload className="h-5 w-5" />
+        {uploading ? 'Uploading...' : 'Upload Trainer Avatar'}
       </Button>
     </div>
   );

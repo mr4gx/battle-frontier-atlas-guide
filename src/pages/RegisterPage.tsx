@@ -64,6 +64,10 @@ const RegisterPage = () => {
               Register New Trainer
             </h1>
             
+            <div className="flex justify-center mb-6">
+              <AvatarUpload onUpload={url => setAvatarUrl(url)} />
+            </div>
+
             {error && (
               <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4 text-sm">
                 {error}
@@ -81,10 +85,6 @@ const RegisterPage = () => {
             )}
             
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="flex justify-center mb-6">
-                <AvatarUpload onUpload={url => setAvatarUrl(url)} />
-              </div>
-
               <div>
                 <label className="block text-sm font-medium mb-1" htmlFor="name">
                   Trainer Name *
