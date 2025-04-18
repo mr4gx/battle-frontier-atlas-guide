@@ -1,91 +1,75 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, MapPin, Trophy, User, FileText, Sword } from "lucide-react";
+import { Home, Trophy, Map, Swords, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useBattleLock } from "@/hooks/use-battle-lock";
 
-export function BottomNavigation() {
+export const BottomNavigation = () => {
   const location = useLocation();
-  const { isLocked, activeBattleRoute } = useBattleLock();
-  
+  const pathname = location.pathname;
+
   const navItems = [
     {
-      label: "Home",
+      name: "Home",
       icon: Home,
       href: "/dashboard",
+      active: pathname === "/dashboard",
     },
     {
-      label: "Battle Areas",
-      icon: MapPin,
+      name: "Battle Areas",
+      icon: Map,
       href: "/battle-areas",
+      active: pathname === "/battle-areas" || pathname.startsWith("/battle-area/"),
     },
     {
-      label: "Battles",
-      icon: Sword,
+      name: "Battles",
+      icon: Swords,
       href: "/battles",
+      active: pathname === "/battles" || pathname === "/battles/history" || pathname === "/battle/setup" || pathname === "/bulletin",
     },
     {
-      label: "Bulletin",
-      icon: FileText,
-      href: "/bulletin",
+      name: "Trainers",
+      icon: Users,
+      href: "/trainers",
+      active: pathname === "/trainers",
     },
     {
-      label: "Leaderboard",
+      name: "Leaderboard",
       icon: Trophy,
       href: "/leaderboard",
+      active: pathname === "/leaderboard",
     },
     {
-      label: "Passport", // Changed from "Profile"
+      name: "Profile",
       icon: User,
-      href: "/profile", // Keeping the href the same as it points to the correct route
+      href: "/profile",
+      active: pathname === "/profile" || pathname === "/passport",
     },
   ];
-  
-  // If navigation is locked and we're not on the active battle route, redirect
-  const handleNavigation = (e: React.MouseEvent, href: string) => {
-    if (isLocked && href !== activeBattleRoute) {
-      e.preventDefault();
-      // Alert could be replaced with a toast notification
-      alert("You cannot navigate away during an active battle!");
-      return false;
-    }
-    return true;
-  };
-  
+
   return (
-    <nav className="atl-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-md border-t border-white/10 flex justify-around">
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.href || 
-                         (item.href !== "/dashboard" && location.pathname.startsWith(item.href));
-        
-        return (
-          <Link
-            key={item.href}
-            to={item.href}
-            onClick={(e) => handleNavigation(e, item.href)}
+    <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex items-center justify-around z-50">
+      {navItems.map((item) => (
+        <Link
+          key={item.name}
+          to={item.href}
+          className={cn(
+            "flex flex-col items-center justify-center px-2 py-1 text-xs",
+            item.active
+              ? "text-atl-primary-purple"
+              : "text-gray-500 hover:text-gray-700"
+          )}
+        >
+          <item.icon
             className={cn(
-              "flex flex-col items-center justify-center py-3 px-2 w-full",
-              isActive 
-                ? "text-[#1EAEDB]" 
-                : "text-[#0EA5E9] hover:text-[#1EAEDB] transition-colors"
+              "h-6 w-6",
+              item.active
+                ? "text-atl-primary-purple"
+                : "text-gray-500 group-hover:text-gray-700"
             )}
-          >
-            <item.icon 
-              size={24} 
-              className={cn(
-                isActive ? "text-[#1EAEDB]" : "text-[#0EA5E9]",
-                "mb-1"
-              )} 
-            />
-            <span className={cn(
-              "text-xs font-medium",
-              isActive ? "text-[#1EAEDB]" : "text-[#0EA5E9]"
-            )}>
-              {item.label}
-            </span>
-          </Link>
-        );
-      })}
-    </nav>
+          />
+          <span>{item.name}</span>
+        </Link>
+      ))}
+    </div>
   );
-}
+};

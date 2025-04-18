@@ -24,7 +24,8 @@ import TeamManagementPage from "@/pages/TeamManagementPage";
 import BattleHistoryPage from "@/pages/BattleHistoryPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import BattleBulletinPage from "@/pages/BattleBulletinPage";
-import BattlesPage from "@/pages/BattlesPage"; // Add the new BattlesPage
+import BattlesPage from "@/pages/BattlesPage";
+import TrainersListPage from "@/pages/TrainersListPage"; // Add the new TrainersListPage
 import NotFound from "@/pages/NotFound";
 import Index from "@/pages/Index";
 
@@ -53,17 +54,18 @@ const App = () => (
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/passport" element={<PassportPage />} />
-                <Route path="/battle-areas" element={<BattleAreasMapPage />} /> {/* Updated route */}
-                <Route path="/battle-area/:id" element={<BattleAreaDetailPage />} /> {/* Updated route */}
+                <Route path="/battle-areas" element={<BattleAreasMapPage />} />
+                <Route path="/battle-area/:id" element={<BattleAreaDetailPage />} />
                 <Route path="/battle/setup" element={<BattleSetupPage />} />
                 <Route path="/battle/results" element={<BattleResultsPage />} />
                 <Route path="/scanner" element={<QRScannerPage />} />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/team" element={<TeamManagementPage />} />
-                <Route path="/battles" element={<BattlesPage />} /> {/* New route */}
+                <Route path="/battles" element={<BattlesPage />} />
                 <Route path="/battles/history" element={<BattleHistoryPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/bulletin" element={<BattleBulletinPage />} />
+                <Route path="/trainers" element={<TrainersListPage />} /> {/* Add new route */}
               </Route>
 
               {/* Fallback routes */}
