@@ -14,7 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      battle_requests: {
+        Row: {
+          battle_style: string
+          created_at: string
+          facility_id: string
+          facility_name: string
+          id: string
+          notes: string | null
+          opponent_id: string | null
+          status: string
+          time: string
+          tokens_wagered: number
+          trainer_avatar: string | null
+          trainer_class: string | null
+          trainer_id: string
+          trainer_name: string
+          updated_at: string
+        }
+        Insert: {
+          battle_style: string
+          created_at?: string
+          facility_id: string
+          facility_name: string
+          id?: string
+          notes?: string | null
+          opponent_id?: string | null
+          status?: string
+          time: string
+          tokens_wagered?: number
+          trainer_avatar?: string | null
+          trainer_class?: string | null
+          trainer_id: string
+          trainer_name: string
+          updated_at?: string
+        }
+        Update: {
+          battle_style?: string
+          created_at?: string
+          facility_id?: string
+          facility_name?: string
+          id?: string
+          notes?: string | null
+          opponent_id?: string | null
+          status?: string
+          time?: string
+          tokens_wagered?: number
+          trainer_avatar?: string | null
+          trainer_class?: string | null
+          trainer_id?: string
+          trainer_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      discord_connections: {
+        Row: {
+          access_token: string
+          created_at: string
+          discord_avatar: string | null
+          discord_discriminator: string | null
+          discord_user_id: string
+          discord_username: string
+          id: string
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          discord_avatar?: string | null
+          discord_discriminator?: string | null
+          discord_user_id: string
+          discord_username: string
+          id?: string
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          discord_avatar?: string | null
+          discord_discriminator?: string | null
+          discord_user_id?: string
+          discord_username?: string
+          id?: string
+          refresh_token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      discord_notifications: {
+        Row: {
+          battle_requests: boolean | null
+          created_at: string
+          id: string
+          leaderboard_changes: boolean | null
+          match_results: boolean | null
+          tournament_updates: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          battle_requests?: boolean | null
+          created_at?: string
+          id?: string
+          leaderboard_changes?: boolean | null
+          match_results?: boolean | null
+          tournament_updates?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          battle_requests?: boolean | null
+          created_at?: string
+          id?: string
+          leaderboard_changes?: boolean | null
+          match_results?: boolean | null
+          tournament_updates?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trainers: {
+        Row: {
+          avatar: string | null
+          badges: string[] | null
+          created_at: string
+          id: string
+          level: number | null
+          name: string
+          team: Json | null
+          tokens: number | null
+          trainer_class: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          avatar?: string | null
+          badges?: string[] | null
+          created_at?: string
+          id?: string
+          level?: number | null
+          name: string
+          team?: Json | null
+          tokens?: number | null
+          trainer_class?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          avatar?: string | null
+          badges?: string[] | null
+          created_at?: string
+          id?: string
+          level?: number | null
+          name?: string
+          team?: Json | null
+          tokens?: number | null
+          trainer_class?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
