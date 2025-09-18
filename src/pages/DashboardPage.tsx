@@ -14,6 +14,7 @@ import { ReturnToBattleButton } from "@/components/return-to-battle-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
+import { UnityExportButton } from "@/components/unity-export-button";
 
 const MAX_TOKENS_TO_QUALIFY = 25;
 
@@ -201,6 +202,12 @@ const DashboardPage = () => {
                 <Link to="/notifications">All Updates</Link>
               </Badge>
             </div>
+          </div>
+        </section>
+
+        <section className="mb-6">
+          <div className="flex justify-center">
+            <UnityExportButton />
           </div>
         </section>
       </main>
