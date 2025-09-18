@@ -1,11 +1,1 @@
-
-project_id = "udsproxacchluxotubqc"
-
-[functions.discord-auth]
-verify_jwt = false
-
-[functions.discord-auth-callback]
-verify_jwt = false
-
-[functions.discord-leaderboard]
-verify_jwt = true
+project_id = "gssivdvlkxnkeuqgcpzz"
